@@ -1,9 +1,9 @@
 {
- "built_at": "2026-09-23T01:08:41.557Z",
+ "built_at": "2026-09-23T01:18:42.247Z",
  "stages": {
   "city_limits": {
    "ok": true,
-   "seconds": 0.387,
+   "seconds": 0.471,
    "geoid": "0629504",
    "bbox": [
     -121.64352,
@@ -14,19 +14,20 @@
   },
   "blocks": {
    "ok": true,
-   "seconds": 13.156,
+   "seconds": 14.829,
    "blocks": 634,
    "city_blocks": 627,
    "city_pop": 59520
   },
   "housing_detail": {
-   "ok": false,
-   "seconds": 0.78,
-   "error": "Error: https://api.census.gov/data/2020/dec/dhc?get=H3_001N,H3_002N,H4_001N,H4_004N&for=block:*&in=state:06&in=county:085&in=tract:512602: not JSON: <html style=\"font-size: 14px;\">\n\n<head>\n    <title>Missing Key</title>\n    <link rel=\"icon\" type=\"image/x-icon\" href=\"favicon.ico\">\n    <link rel=\"stylesheet\" type=\"text/css\" href=\"assets/styles.css\">\n    at getJson (file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:72:50)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async censusBlocks (file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:175:35)\n    at async addHousingDetail (file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:184:15)\n    at async stage (file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:83:20)\n    at async file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:439:1"
+   "ok": true,
+   "seconds": 7.006,
+   "matched": 634,
+   "of": 634
   },
   "boundary_streets": {
    "ok": true,
-   "seconds": 2.721,
+   "seconds": 3.909,
    "ways": 240,
    "by_name": {
     "Monterey Road": 50,
@@ -43,7 +44,7 @@
   },
   "parcels": {
    "ok": true,
-   "seconds": 9.253,
+   "seconds": 9.22,
    "source": "https://services8.arcgis.com/n7NW5ijV4dJUmrID/arcgis/rest/services/Parcels_view/FeatureServer/0",
    "parcels": 10301,
    "without_block": 31,
@@ -56,7 +57,8 @@
  "checks": {
   "city_population_from_blocks": 59520,
   "city_population_expected": 59520,
-  "city_population_ratio": 1
+  "city_population_ratio": 1,
+  "pl_vs_tiger_pop_mismatches": 0
  },
  "parcel_discovery": {
   "candidates": [
@@ -184,14 +186,14 @@
    {
     "kind": "socrata",
     "domain": "data.sccgov.org",
-    "id": "neqe-k72i",
-    "via": "socrata:Land Polygon"
+    "id": "kzek-6axk",
+    "via": "socrata:Air Polygon"
    },
    {
     "kind": "socrata",
     "domain": "data.sccgov.org",
-    "id": "kzek-6axk",
-    "via": "socrata:Air Polygon"
+    "id": "neqe-k72i",
+    "via": "socrata:Land Polygon"
    },
    {
     "kind": "socrata",
@@ -629,16 +631,16 @@
    },
    {
     "socrata": "data.sccgov.org",
-    "name": "Land Polygon",
-    "id": "neqe-k72i",
-    "type": "dataset",
+    "name": "Air Polygon",
+    "id": "kzek-6axk",
+    "type": "map",
     "lens": "tabular"
    },
    {
     "socrata": "data.sccgov.org",
-    "name": "Air Polygon",
-    "id": "kzek-6axk",
-    "type": "map",
+    "name": "Land Polygon",
+    "id": "neqe-k72i",
+    "type": "dataset",
     "lens": "tabular"
    },
    {
