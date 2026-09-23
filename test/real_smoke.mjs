@@ -29,7 +29,7 @@ console.log("load ms", Date.now() - t0, "|", await page.locator("#status").textC
 console.log(JSON.stringify(await page.evaluate(() => {
   const s = window.app.stats, d = s.districtStats(), c = s.cityStats();
   const cls = {}; for (const l of window.app.lots.values()) cls[l.cls] = (cls[l.cls] || 0) + 1;
-  const pick = (x) => ({ lots: x.lots, pop: Math.round(x.pop), hu: Math.round(x.hu), acres: Math.round(x.acres), dens: x.density_acre?.toFixed(1), hu_acre: x.hu_acre?.toFixed(1) });
+  const pick = (x) => ({ lots: x.lots, pop: Math.round(x.pop), hu: Math.round(x.hu), households: Math.round(x.occ), renters: x.renter_share?.toFixed(3), hh_size: x.hh_size?.toFixed(2), minors: (x.minors / x.pop)?.toFixed(3), acres: Math.round(x.acres), dens: x.density_acre?.toFixed(1), hu_acre: x.hu_acre?.toFixed(1) });
   return { district: pick(d), city: pick(c), classes: cls };
 }), null, 1));
 await page.screenshot({ path: path.join(SHOTS, "real-1-map.png") });
