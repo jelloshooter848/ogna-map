@@ -43,15 +43,18 @@ export const EST_TAX_RATE = 0.0118;
  */
 export const UNIT_WEIGHTS = {
   single: 1, condo: 1, mobile: 1, duplex: 2, triplex: 3, fourplex: 4,
-  multi: { area: true, sqftPerUnit: 1100, min: 5 },
+  multi: { area: true, sqftPerUnit: 1100, min: 4 },
+  mobilepark: { area: true, sqftPerUnit: 4000, min: 5 },
   mixed: { area: true, sqftPerUnit: 2500, min: 1 },
   nonresidential: 0, vacant: 0,
 };
 
 /**
- * Land-use classification. Descriptions are matched first (case-insensitive), then numeric codes.
- * Code prefixes follow the Santa Clara County Assessor's use codes; check data/sources/build_report.json
- * (parcel_layer.use_codes) and adjust if the county layer uses a different scheme.
+ * Land-use classification. Descriptions are matched first (case-insensitive), then the assessor's use
+ * code (exact match after dropping leading zeros; anything else counts as non-residential). The codes
+ * below are the Santa Clara County Assessor's residential codes as they appear in the City of Gilroy
+ * parcel layer: 1 single family, 2 duplex, 3 triplex, 4 apartments, 5 other multi-unit, 6 condominium,
+ * 7 mobile-home park. Check data/sources/build_report.json (parcel_layer.use_codes) if this changes.
  */
 export const USE_RULES = [
   [/vacant|unimproved/i, "vacant"],
@@ -66,6 +69,7 @@ export const USE_RULES = [
   [/commerc|office|retail|store|industr|church|school|public|govern|park|parking|hotel|motel|warehouse|exempt|utility|restaurant|bank|garage|service/i, "nonresidential"],
 ];
 export const USE_CODE_RULES = {
-  "00": "vacant", "01": "single", "02": "duplex", "03": "triplex", "04": "fourplex", "05": "multi",
-  "06": "condo", "07": "mobile", "08": "multi", "09": "single",
+  "1": "single", "2": "duplex", "3": "triplex", "4": "multi", "5": "multi", "6": "condo", "7": "mobilepark",
 };
+/** Parcel types that are never homes (common areas, road easements…), whatever their use code. */
+export const NON_LOT_TYPES = /common area|road|easement|flood|open space|right of way/i;

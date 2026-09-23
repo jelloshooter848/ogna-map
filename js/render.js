@@ -28,8 +28,8 @@ export const view = { metric: "none", unit: "lots", activeRegion: null };
 // ---- metrics -----------------------------------------------------------------------------------------
 
 const lotAcres = (l) => { const b = blocks.get(l.block); return b && b.lotSqft > 0 ? b.land_acres * (l.sqft / b.lotSqft) : null; };
-const USE_COLORS = { single: "#f6ad55", condo: "#ed8936", mobile: "#fbd38d", duplex: "#dd6b20", triplex: "#c05621", fourplex: "#c05621", multi: "#9c4221", mixed: "#805ad5", nonresidential: "#4299e1", vacant: "#a0aec0", unknown: "#e2e8f0" };
-const USE_LABELS = { single: "Single family", condo: "Condo / townhouse", mobile: "Mobile home", duplex: "Duplex", triplex: "Triplex", fourplex: "Fourplex", multi: "Apartments (5+)", mixed: "Mixed use", nonresidential: "Non-residential", vacant: "Vacant", unknown: "Unknown use" };
+const USE_COLORS = { single: "#f6ad55", condo: "#ed8936", mobile: "#fbd38d", mobilepark: "#fbd38d", duplex: "#dd6b20", triplex: "#c05621", fourplex: "#c05621", multi: "#9c4221", mixed: "#805ad5", nonresidential: "#4299e1", vacant: "#a0aec0", unknown: "#e2e8f0" };
+const USE_LABELS = { single: "Single family", condo: "Condo / townhouse", mobile: "Mobile home", mobilepark: "Mobile-home park", duplex: "Duplex", triplex: "Triplex", fourplex: "Fourplex", multi: "Apartments / multi-unit", mixed: "Mixed use", nonresidential: "Non-residential", vacant: "Vacant", unknown: "Unknown use" };
 
 /** Each metric: label, per-lot value, optional per-block value, formatter. */
 export const METRICS = {
@@ -39,6 +39,8 @@ export const METRICS = {
   pop: { label: "Residents per lot (est.)", lot: (l) => l.est.pop, block: (b) => b.pop, fmt: (v) => v.toFixed(v < 10 ? 1 : 0) },
   renter: { label: "Renter share (census block)", lot: (l) => { const b = blocks.get(l.block); return b?.occ > 0 ? b.rent / b.occ : null; }, block: (b) => (b.occ > 0 ? b.rent / b.occ : null), fmt: (v) => fmtPct(v) },
   use: { label: "Land use", categorical: true, lot: (l) => l.cls },
+  sale_year: { label: "Year of last sale", lot: (l) => (l.sale_year > 1900 ? l.sale_year : null), fmt: (v) => String(Math.round(v)) },
+  far: { label: "Building area ÷ lot area", lot: (l) => (l.bldg_sqft > 0 && l.sqft > 0 ? l.bldg_sqft / l.sqft : null), fmt: (v) => v.toFixed(2) },
   year: { label: "Year built", lot: (l) => (l.year > 1800 ? l.year : null), fmt: (v) => String(Math.round(v)) },
   tax: { label: "Property tax per lot", lot: (l) => lotTax(l.apn).amount, fmt: (v) => fmtMoney(v) },
   tax_sqft: { label: "Property tax per sq ft of lot", lot: (l) => { const t = lotTax(l.apn).amount; return t !== null && l.sqft > 0 ? t / l.sqft : null; }, fmt: (v) => "$" + v.toFixed(2) },
@@ -361,7 +363,9 @@ export function lotSummary(apn) {
     title: l.addr ? escapeHtml(l.addr) : `Lot ${formatApn(apn)}`,
     lines: [
       `<b>APN</b> ${formatApn(apn)}${l.use_desc || l.use ? ` · ${escapeHtml(l.use_desc || l.use)}` : ""}`,
-      `<b>Lot</b> ${fmtSqft(l.sqft)}${l.year ? ` · built ${l.year}` : ""}${l.units ? ` · ${l.units} units` : ""}${l.zone ? ` · zoned ${escapeHtml(l.zone)}` : ""}`,
+      `<b>Lot</b> ${fmtSqft(l.sqft)}${l.bldg_sqft ? ` · building ${fmtSqft(l.bldg_sqft)}${l.floors ? `, ${l.floors} floor${l.floors > 1 ? "s" : ""}` : ""}` : ""}${l.year ? ` · built ${l.year}` : ""}${l.units ? ` · ${l.units} units` : ""}`,
+      ...(l.zone || l.gp ? [`<b>Zoning</b> ${escapeHtml(l.zone || "—")}${l.zclass ? ` (${escapeHtml(l.zclass)})` : ""}${l.gp ? ` · <b>General Plan</b> ${escapeHtml(l.gp)}` : ""}`] : []),
+      ...(l.sale_year || l.historic || (l.flood && l.flood !== "X") || l.gov === "Yes" ? [[l.sale_year ? `<b>Last sold</b> ${l.sale_year}` : "", l.historic ? `<b>Mills Act</b> ${escapeHtml(l.historic)}` : "", l.flood && l.flood !== "X" ? `<b>Flood zone</b> ${escapeHtml(l.flood)}` : "", l.gov === "Yes" ? "government-owned" : ""].filter(Boolean).join(" · ")] : []),
       `<b>Residents</b> ~${l.est.pop.toFixed(1)} · <b>homes</b> ~${l.est.hu.toFixed(1)} <span class="muted">(estimated from census block ${l.block ? l.block.slice(-4) : "—"})</span>`,
       `<b>Property tax</b> ${t.amount === null ? '<span class="muted">no tax data (import a tax roll)</span>' : `${fmtMoney(t.amount)} <span class="muted">${t.source === "roll" ? "tax roll" : "estimated from assessed value"}</span>`}`,
       `<b>In</b> ${regions.length ? regions.map(escapeHtml).join(", ") : '<span class="muted">no neighborhood</span>'}`,

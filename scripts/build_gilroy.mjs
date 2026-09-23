@@ -344,13 +344,16 @@ async function buildParcels() {
 
   const names = [...new Set(got.features.flatMap((f) => Object.keys(f.properties || {})))];
   const F = CONFIG.parcels.fields || {};
-  const apnF = F.apn || pickField(names, APN_PATTERNS);
-  const useF = F.use || pickField(names, [/use_?code/i, /^luc$/i, /land_?use/i, /usecode/i, /use_?desc/i, /^use$/i]);
-  const useDescF = F.use_desc || pickField(names.filter((n) => n !== useF), [/use_?desc/i, /land_?use_?desc/i, /class/i]);
-  const unitsF = F.units || pickField(names, [/^units$/i, /dwell/i, /num_?units/i, /unit_?count/i, /living_?units/i]);
-  const yearF = F.year || pickField(names, [/year_?built/i, /yr_?built/i, /yrblt/i]);
-  const addrF = F.address || pickField(names, [/situs_?addr/i, /situs/i, /^address$/i, /site_?addr/i, /full_?addr/i]);
-  const zoneF = F.zoning || pickField(names, [/zon/i]);
+  // A field set to null in sources.json is deliberately unused; a missing one is auto-detected.
+  const field = (k, patterns) => (k in F ? F[k] : pickField(names, patterns));
+  const apnF = field("apn", APN_PATTERNS);
+  const useF = field("use", [/use_?code/i, /^luc$/i, /land_?use/i, /usecode/i, /use_?desc/i, /^use$/i]);
+  const useDescF = field("use_desc", [/use_?desc/i, /land_?use_?desc/i]);
+  const unitsF = field("units", [/^units$/i, /dwell/i, /num(ber)?_?(of_)?units/i, /unit_?count/i, /living_?units/i]);
+  const yearF = field("year", [/year_?built/i, /yr_?built/i, /yrblt/i]);
+  const addrF = field("address", [/situs_?addr/i, /situs/i, /^address$/i, /site_?addr/i, /full_?addr/i]);
+  const zoneF = field("zoning", [/zon/i]);
+  const EXTRA = Object.entries(CONFIG.parcels.extra_fields || {}).filter(([, src]) => names.includes(src) && !SENSITIVE.test(src));
   if (!apnF) throw new Error(`no APN field among ${names.join(", ")}`);
 
   // Field inventory with example values, except for anything that looks like owner data.
@@ -400,6 +403,13 @@ async function buildParcels() {
       ...(yearF && Number(p[yearF]) > 1800 ? { year: Number(p[yearF]) } : {}),
       ...(zoneF && p[zoneF] ? { zone: String(p[zoneF]).trim() } : {}),
     };
+    for (const [key, src] of EXTRA) {
+      let v = p[src];
+      if (v === null || v === undefined || String(v).trim() === "" || String(v).trim() === "<Null>") continue;
+      if (key === "sale_year") v = Number(String(v).slice(0, 4)) || null;  // YYYYMMDD -> year only
+      else if (typeof v === "string") v = v.trim();
+      if (v !== null && v !== 0 && v !== "0") props[key] = v;
+    }
     // Air parcels (condos) can share a footprint with their land parcel; keep one feature per APN.
     if (seen.has(apn)) continue;
     seen.set(apn, true);
@@ -407,7 +417,7 @@ async function buildParcels() {
     const vf = names.filter((n) => VALUE_FIELD.test(n) && !SENSITIVE.test(n));
     if (vf.length) values.push([apn, ...vf.map((n) => p[n] ?? "")]);
   }
-  await writeJson(path.join(DATA, "parcels.json"), { type: "FeatureCollection", source: got.source, fields_used: { apn: apnF, use: useF, use_desc: useDescF, units: unitsF, year: yearF, address: addrF, zoning: zoneF }, features: out });
+  await writeJson(path.join(DATA, "parcels.json"), { type: "FeatureCollection", source: got.source, fields_used: { apn: apnF, use: useF, use_desc: useDescF, units: unitsF, year: yearF, address: addrF, zoning: zoneF, ...Object.fromEntries(EXTRA) }, features: out });
   const valueFields = names.filter((n) => VALUE_FIELD.test(n) && !SENSITIVE.test(n));
   if (valueFields.length) {
     const csv = [["apn", ...valueFields].join(","), ...values.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))];

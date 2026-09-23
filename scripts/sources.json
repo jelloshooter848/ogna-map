@@ -10,10 +10,10 @@
     37.07
   ],
   "parcels_bbox": [
-    -121.605,
-    36.985,
-    -121.535,
-    37.032
+    -121.597,
+    36.981,
+    -121.548,
+    37.03
   ],
   "boundary_streets": [
     "Leavesley Road",
@@ -39,7 +39,26 @@
     "socrata_domains": [
       "data.sccgov.org"
     ],
-    "fields": {},
-    "min_lots": 1500
+    "fields": {
+      "apn": "APN",
+      "use": "USE_CODE",
+      "use_desc": null,
+      "units": "NUMBER_OF_UNITS",
+      "year": "YEAR_BUILT",
+      "address": "SITUS_ADDRESS",
+      "zoning": "ZoneCode"
+    },
+    "min_lots": 1500,
+    "extra_fields": {
+      "gp": "LandUsedescription",
+      "zclass": "ZClass",
+      "ptype": "ParcelType",
+      "bldg_sqft": "TOTAL_SQ_FOOTAGE",
+      "floors": "NUMBER_OF_FLOORS",
+      "gov": "IsGovernmentOwned",
+      "historic": "MillsActArchitecturalStyle",
+      "flood": "FEMAFloodZone",
+      "sale_year": "LTST_TRANSFER_DT"
+    }
   }
 }

@@ -37,6 +37,10 @@ test("classification", () => {
   assert.equal(classifyLot({ use: "02" }), "duplex");
   assert.equal(classifyLot({ use: "10", use_desc: "COMMERCIAL" }), "nonresidential");
   assert.equal(classifyLot({}), "unknown");
+  assert.equal(classifyLot({ use: "16" }), "nonresidential", "no prefix matching: 16 is not 1");
+  assert.equal(classifyLot({ use: "01" }), "single");
+  assert.equal(classifyLot({ use: "6" }), "condo");
+  assert.equal(classifyLot({ use: "1", ptype: "Common Area" }), "nonresidential");
 });
 
 test("block counts are spread over residential lots and sum back to the block", () => {

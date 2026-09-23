@@ -1,6 +1,6 @@
 // Lots (parcels) and census blocks: loading, land-use classification, per-lot estimates and tax lookup.
 // No DOM, no Leaflet, so it runs under Node for tests.
-import { UNIT_WEIGHTS, USE_RULES, USE_CODE_RULES, EST_TAX_RATE } from "./config.js";
+import { UNIT_WEIGHTS, USE_RULES, USE_CODE_RULES, NON_LOT_TYPES, EST_TAX_RATE } from "./config.js";
 
 export const lots = new Map();        // apn -> lot record (see loadData)
 export const blocks = new Map();      // block GEOID -> block record
@@ -13,15 +13,13 @@ export const normaliseApn = (v) => String(v ?? "").replace(/[^0-9A-Za-z]/g, "").
 
 /** Land-use class of a lot from its description and code (see USE_RULES / USE_CODE_RULES in config). */
 export function classifyLot(p) {
+  if (p.ptype && NON_LOT_TYPES.test(p.ptype)) return "nonresidential";
   const desc = `${p.use_desc || ""} ${/[a-z]/i.test(p.use || "") ? p.use : ""}`.trim();
   if (desc) for (const [re, cls] of USE_RULES) if (re.test(desc)) return cls;
   const code = String(p.use || "").trim();
   if (code) {
-    for (const len of [3, 2, 1]) {
-      const cls = USE_CODE_RULES[code.slice(0, len)];
-      if (cls) return cls;
-    }
-    return "nonresidential";
+    const key = /^\d+$/.test(code) ? String(Number(code)) : code.toUpperCase();
+    return USE_CODE_RULES[key] || "nonresidential";
   }
   return "unknown";
 }
