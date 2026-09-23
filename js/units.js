@@ -77,9 +77,10 @@ export function loadData({ parcels, blocks: blockFc }) {
 
 /** City benchmark: every block inside the city limits. */
 export function cityTotals() {
-  const t = { pop: 0, hu: 0, occ: 0, rent: 0, adults: 0, acres: 0, blocks: 0 };
+  const t = { pop: 0, hu: 0, occ: 0, rent: 0, adults: 0, acres: 0, blocks: 0, detail_blocks: 0 };
   for (const b of blocks.values()) {
     if (!b.in_city) continue;
+    if (Number.isFinite(b.occ)) t.detail_blocks++;
     for (const k of ALLOCATED) t[k] += Number(b[k]) || 0;
     t.acres += Number(b.land_acres) || 0;
     t.blocks++;

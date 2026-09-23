@@ -10,7 +10,7 @@ import { membersOf, visibleRegionIds, neighborhoodIds, districtId, stateVersion,
 const ACRES_PER_SQMI = 640;
 
 export function statsForLots(apns) {
-  const s = { lots: 0, residential_lots: 0, pop: 0, hu: 0, occ: 0, rent: 0, adults: 0, lot_sqft: 0, acres: 0, tax: 0, tax_lots: 0, tax_roll_lots: 0, value: 0, tax_pop: 0, tax_sqft: 0 };
+  const s = { lots: 0, residential_lots: 0, pop: 0, hu: 0, occ: 0, rent: 0, adults: 0, lot_sqft: 0, acres: 0, tax: 0, tax_lots: 0, tax_roll_lots: 0, value: 0, tax_pop: 0, tax_sqft: 0, detail_lots: 0 };
   for (const apn of apns) {
     const l = lots.get(apn);
     if (!l) continue;
@@ -19,6 +19,7 @@ export function statsForLots(apns) {
     s.pop += l.est.pop; s.hu += l.est.hu; s.occ += l.est.occ; s.rent += l.est.rent; s.adults += l.est.adults;
     s.lot_sqft += l.sqft;
     const b = blocks.get(l.block);
+    if (b && Number.isFinite(b.occ)) s.detail_lots++;
     if (b && b.lotSqft > 0) s.acres += (Number(b.land_acres) || 0) * (l.sqft / b.lotSqft);
     const t = lotTax(apn);
     if (t.amount !== null) { s.tax += t.amount; s.tax_lots++; s.tax_pop += l.est.pop; s.tax_sqft += l.sqft; if (t.source === "roll") s.tax_roll_lots++; }
@@ -28,13 +29,15 @@ export function statsForLots(apns) {
 }
 
 function derive(s) {
+  // Households, renters and adults come from the Census API; without them show "—", not zeros.
+  if (!s.detail_lots) { s.occ = null; s.rent = null; s.adults = null; }
   s.density_acre = s.acres > 0 ? s.pop / s.acres : null;
   s.density_sqmi = s.acres > 0 ? (s.pop / s.acres) * ACRES_PER_SQMI : null;
   s.hu_acre = s.acres > 0 ? s.hu / s.acres : null;
   s.renter_share = s.occ > 0 ? s.rent / s.occ : null;
   s.hh_size = s.occ > 0 ? s.pop / s.occ : null;
-  s.vacancy = s.hu > 0 ? 1 - s.occ / s.hu : null;
-  s.minors = s.pop > 0 ? Math.max(0, s.pop - s.adults) : null;
+  s.vacancy = s.hu > 0 && Number.isFinite(s.occ) ? 1 - s.occ / s.hu : null;
+  s.minors = s.pop > 0 && Number.isFinite(s.adults) ? Math.max(0, s.pop - s.adults) : null;
   s.has_tax = s.tax_lots > 0;
   s.tax_complete = s.lots > 0 && s.tax_lots === s.lots;
   // Per-resident and per-sq-ft figures use only the lots that have tax data, so a partial roll isn't diluted.
@@ -103,7 +106,7 @@ export function coverage() {
 export function cityStats() {
   return cached("city", () => {
     const t = cityTotals();
-    return derive({ lots: null, residential_lots: null, ...t, lot_sqft: null, tax: 0, tax_lots: 0, tax_roll_lots: 0, value: 0 });
+    return derive({ lots: null, residential_lots: null, ...t, lot_sqft: null, tax: 0, tax_lots: 0, tax_roll_lots: 0, value: 0, detail_lots: t.detail_blocks });
   });
 }
 

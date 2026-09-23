@@ -45,7 +45,7 @@ state and stats modules for debugging.
 
 | File | Contents | Built by |
 |------|----------|----------|
-| `data/parcels.json` | Lots around Oldtown: APN, census block, lot size, and the land-use / units / year built / situs / zoning fields the county layer offers. No owner names, no values. | `scripts/build_gilroy.mjs` |
+| `data/parcels.json` | Lots around Oldtown from the City of Gilroy parcel layer (assessor data as of 2024): APN, census block, lot size, address, assessor use code, units, year built, building size and floors, zoning, General Plan designation, last-sale year, Mills Act style, flood zone, government ownership. No owner names, no values. | `scripts/build_gilroy.mjs` |
 | `data/blocks.json` | 2020 census blocks in and around Gilroy: population and housing units (TIGER `POP20`/`HOUSING20`), occupied and renter-occupied units (DHC H3/H4), adults (P.L. 94-171 P3), land acres, `in_city` flag | same |
 | `data/city_limits.json` | Gilroy place boundary (TIGER/Line 2020) | same |
 | `data/sources/build_report.json` | What each build stage did, sanity checks (Gilroy population from blocks vs. 59,520), and the parcel layer's field inventory and land-use codes | same |
@@ -106,11 +106,24 @@ Members are APNs with punctuation removed. A lot may appear in several regions. 
 they are recomputed from the data files. A region may carry a `seed_polygon` (lon/lat ring) instead of
 members; on load it gets the lots whose center falls inside.
 
+### Census API key (for households, renters and adults)
+
+Population and housing units come from the TIGER block file and need no key. Households, renter
+households and adults come from the Census API, which now requires a free key:
+
+1. Request one at <https://api.census.gov/data/key_signup.html>.
+2. In GitHub: **Settings → Secrets and variables → Actions → New repository secret**, name
+   `CENSUS_API_KEY`.
+3. Re-run **Build data** (Actions tab → Build data → Run workflow).
+
+Until then those rows show "—".
+
 ## Tests
 
 ```
 npm test                                           # model: allocation, overlaps, undo, round trip, tax import
 node scripts/make_fixture.mjs && node test/browser.mjs   # end to end in headless Chromium
+node test/real_smoke.mjs                                 # loads the real data/, prints district totals
 ```
 
 ## Layout
