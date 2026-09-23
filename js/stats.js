@@ -1,101 +1,121 @@
-// Population / land-area lookups and derived statistics. No DOM, no Leaflet.
-import { tractsOf, visibleRegionIds } from "./state.js";
+// Statistics for sets of lots, regions, the district and the city benchmark. No DOM, no Leaflet.
+//
+// Population and housing come from 2020 census blocks spread over each block's lots (units.js), so any
+// set of lots gets estimated counts. Land area is *gross* acres (streets included): each lot carries its
+// share of its block's land area in proportion to lot size, which keeps densities comparable with the
+// city-wide benchmark computed from whole blocks.
+import { lots, blocks, cityTotals, lotTax, taxRollInfo } from "./units.js";
+import { membersOf, visibleRegionIds, neighborhoodIds, districtId, stateVersion, isHidden } from "./state.js";
 
-let stats = null;                 // { tracts: {geoid: [pop, land_sqmi]}, counties: {...}, state: {...} }
-let benchmarkCounties = ["06037"];
-let benchmarkName = null;         // display name of the benchmark area; null = derive from counties
+const ACRES_PER_SQMI = 640;
 
-export async function loadStats(url) {
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(`stats file ${r.status}`);
-  stats = await r.json();
-  return stats;
-}
-export function statsLoaded() { return stats !== null; }
-export function statsVersion() { return stats?.version || "unknown"; }
-
-export function knownTract(geoid) { return Boolean(stats?.tracts?.[geoid]); }
-
-export function tractStats(geoid) {
-  const t = stats?.tracts?.[geoid];
-  return t ? { population: t[0], land_sqmi: t[1] } : { population: null, land_sqmi: null };
-}
-
-export function regionStats(id) {
-  let pop = 0, area = 0, knownPop = true, knownArea = true;
-  const tracts = tractsOf(id);
-  for (const g of tracts) {
-    const s = tractStats(g);
-    if (Number.isFinite(s.population)) pop += s.population; else knownPop = false;
-    if (Number.isFinite(s.land_sqmi)) area += s.land_sqmi; else knownArea = false;
+export function statsForLots(apns) {
+  const s = { lots: 0, residential_lots: 0, pop: 0, hu: 0, occ: 0, rent: 0, adults: 0, lot_sqft: 0, acres: 0, tax: 0, tax_lots: 0, tax_roll_lots: 0, value: 0, tax_pop: 0, tax_sqft: 0 };
+  for (const apn of apns) {
+    const l = lots.get(apn);
+    if (!l) continue;
+    s.lots++;
+    if (l.est.hu > 0) s.residential_lots++;
+    s.pop += l.est.pop; s.hu += l.est.hu; s.occ += l.est.occ; s.rent += l.est.rent; s.adults += l.est.adults;
+    s.lot_sqft += l.sqft;
+    const b = blocks.get(l.block);
+    if (b && b.lotSqft > 0) s.acres += (Number(b.land_acres) || 0) * (l.sqft / b.lotSqft);
+    const t = lotTax(apn);
+    if (t.amount !== null) { s.tax += t.amount; s.tax_lots++; s.tax_pop += l.est.pop; s.tax_sqft += l.sqft; if (t.source === "roll") s.tax_roll_lots++; }
+    if (t.value !== null) s.value += t.value;
   }
-  return {
-    tracts: tracts.length,
-    population: knownPop ? pop : null,
-    land_sqmi: knownArea ? area : null,
-    density: knownPop && knownArea && area > 0 ? pop / area : null,
-  };
+  return derive(s);
 }
 
-/** Stats for an arbitrary list of geoids (used for baseline comparisons). */
-export function statsForTracts(geoids) {
-  let pop = 0, area = 0;
-  for (const g of geoids) {
-    const s = tractStats(g);
-    pop += s.population || 0;
-    area += s.land_sqmi || 0;
-  }
-  return { tracts: geoids.length, population: pop, land_sqmi: area, density: area > 0 ? pop / area : null };
+function derive(s) {
+  s.density_acre = s.acres > 0 ? s.pop / s.acres : null;
+  s.density_sqmi = s.acres > 0 ? (s.pop / s.acres) * ACRES_PER_SQMI : null;
+  s.hu_acre = s.acres > 0 ? s.hu / s.acres : null;
+  s.renter_share = s.occ > 0 ? s.rent / s.occ : null;
+  s.hh_size = s.occ > 0 ? s.pop / s.occ : null;
+  s.vacancy = s.hu > 0 ? 1 - s.occ / s.hu : null;
+  s.minors = s.pop > 0 ? Math.max(0, s.pop - s.adults) : null;
+  s.has_tax = s.tax_lots > 0;
+  s.tax_complete = s.lots > 0 && s.tax_lots === s.lots;
+  // Per-resident and per-sq-ft figures use only the lots that have tax data, so a partial roll isn't diluted.
+  s.tax_per_capita = s.has_tax && s.tax_pop > 0 ? s.tax / s.tax_pop : null;
+  s.tax_per_sqft = s.has_tax && s.tax_sqft > 0 ? s.tax / s.tax_sqft : null;
+  s.tax_source = !s.has_tax ? null : s.tax_roll_lots === s.tax_lots ? "roll" : s.tax_roll_lots ? "mixed" : "est";
+  return s;
 }
 
-// ---- benchmark (the "share of county" denominator) ----------------------------
+// Region stats are cached per membership version (regions change often while editing).
+let cache = new Map(), cacheVersion = -1, cacheTax = null;
+function cached(key, fn) {
+  if (cacheVersion !== stateVersion() || cacheTax !== taxRollInfo()) { cache = new Map(); cacheVersion = stateVersion(); cacheTax = taxRollInfo(); }
+  if (!cache.has(key)) cache.set(key, fn());
+  return cache.get(key);
+}
+export function invalidateStats() { cacheVersion = -1; }
 
-export function setBenchmark(counties, name = null) { benchmarkCounties = [...counties]; benchmarkName = name; }
-export function countyName(fips) { return stats?.counties?.[fips]?.name || fips; }
-export function countyTotals(fips) { return stats?.counties?.[fips] || null; }
+export function regionStats(id) { return cached(`r${id}`, () => statsForLots(membersOf(id))); }
 
-export function benchmark() {
-  let population = 0, land_sqmi = 0;
-  for (const f of benchmarkCounties) {
-    const c = stats?.counties?.[f];
-    if (!c) continue;
-    population += c.population;
-    land_sqmi += c.land_sqmi;
-  }
-  const name = benchmarkName || (benchmarkCounties.length === 1 ? `${countyName(benchmarkCounties[0])} County` : "the selected area");
-  return { name, counties: benchmarkCounties, population, land_sqmi, density: land_sqmi > 0 ? population / land_sqmi : null };
+/** Lots in any of the given regions, each counted once. */
+export function unionOf(ids) {
+  const u = new Set();
+  for (const id of ids) for (const a of membersOf(id)) u.add(a);
+  return u;
 }
 
+/** Combined stats for the visible neighborhoods (union, so overlaps are not double counted). */
 export function cumulativeStats() {
-  const ids = visibleRegionIds();
-  const b = benchmark();
-  let population = 0, land = 0, tracts = 0, known = true;
-  for (const id of ids) {
-    const s = regionStats(id);
-    tracts += s.tracts;
-    if (Number.isFinite(s.population) && Number.isFinite(s.land_sqmi)) {
-      population += s.population;
-      land += s.land_sqmi;
-    } else known = false;
-  }
-  const density = known && land > 0 ? population / land : null;
-  return {
-    ids, tracts,
-    population: known ? population : null,
-    land_sqmi: known ? land : null,
-    density,
-    pop_share: known && b.population ? (100 * population) / b.population : null,
-    land_share: known && b.land_sqmi ? (100 * land) / b.land_sqmi : null,
-    density_multiple: density && b.density ? density / b.density : null,
-    benchmark: b,
-  };
+  const ids = visibleRegionIds().filter((id) => id !== districtId());
+  const overlapLots = (() => {
+    const seen = new Map();
+    for (const id of ids) for (const a of membersOf(id)) seen.set(a, (seen.get(a) || 0) + 1);
+    let n = 0; for (const c of seen.values()) if (c > 1) n++;
+    return n;
+  })();
+  const s = cached(`u${ids.join(",")}`, () => statsForLots(unionOf(ids)));
+  return { ids, ...s, overlap_lots: overlapLots, district: districtStats(), city: cityStats() };
 }
 
-// ---- formatting ----------------------------------------------------------------
+export function districtStats() {
+  const d = districtId();
+  return d ? regionStats(d) : null;
+}
 
-export const fmtArea = (v) => (Number.isFinite(v) ? v.toFixed(2) + " sq mi" : "area pending");
-export const fmtPop = (v) => (Number.isFinite(v) ? Math.round(v).toLocaleString() + " people" : "population pending");
-export const fmtDensity = (v) => (Number.isFinite(v) && v > 0 ? Math.round(v).toLocaleString() + "/sq mi" : "density pending");
+/** How much of the district is inside at least one neighborhood. */
+export function coverage() {
+  const d = districtId();
+  if (!d) return null;
+  return cached("coverage", () => {
+    const inHood = unionOf(neighborhoodIds());
+    const district = membersOf(d);
+    const covered = [...district].filter((a) => inHood.has(a));
+    const cs = statsForLots(covered), ds = regionStats(d);
+    const outside = [...inHood].filter((a) => !district.has(a)).length;
+    return {
+      covered_lots: covered.length, district_lots: district.size, outside_lots: outside,
+      covered_pop: cs.pop, district_pop: ds.pop,
+      pop_share: ds.pop > 0 ? cs.pop / ds.pop : null,
+      lot_share: district.size ? covered.length / district.size : null,
+      neighborhoods: neighborhoodIds().filter((id) => membersOf(id).size > 0).length,
+    };
+  });
+}
+
+export function cityStats() {
+  return cached("city", () => {
+    const t = cityTotals();
+    return derive({ lots: null, residential_lots: null, ...t, lot_sqft: null, tax: 0, tax_lots: 0, tax_roll_lots: 0, value: 0 });
+  });
+}
+
+export { isHidden };
+
+// ---- formatting --------------------------------------------------------------------------------------
+
 export const fmtInt = (v) => (Number.isFinite(v) ? Math.round(v).toLocaleString() : "—");
-export const fmtPct = (v) => (Number.isFinite(v) ? v.toFixed(1) + "%" : "—");
+export const fmtPop = (v) => (Number.isFinite(v) ? `${Math.round(v).toLocaleString()} ${Math.round(v) === 1 ? "person" : "people"}` : "—");
+export const fmtAcres = (v) => (Number.isFinite(v) ? (v < 10 ? v.toFixed(1) : Math.round(v).toLocaleString()) + " ac" : "—");
+export const fmtDensity = (v) => (Number.isFinite(v) && v > 0 ? `${v < 10 ? v.toFixed(1) : Math.round(v)}/ac` : "—");
+export const fmtPct = (v, d = 0) => (Number.isFinite(v) ? (100 * v).toFixed(d) + "%" : "—");
+export const fmtMoney = (v) => (Number.isFinite(v) ? "$" + (Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(2) + "M" : Math.round(v).toLocaleString()) : "—");
+export const fmtSqft = (v) => (Number.isFinite(v) ? Math.round(v).toLocaleString() + " sq ft" : "—");
 export const signed = (v, digits = 0) => (v >= 0 ? "+" : "") + (digits ? v.toFixed(digits) : Math.round(v).toLocaleString());

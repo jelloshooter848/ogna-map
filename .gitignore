@@ -7,3 +7,5 @@ private/
 *.xls
 *:Zone.Identifier
 .DS_Store
+test/fixture/
+test/screenshots/

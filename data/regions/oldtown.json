@@ -1,0 +1,20 @@
+{
+ "format_version": "6.0",
+ "units": "apn",
+ "name": "Oldtown Gilroy",
+ "description": "Oldtown Gilroy district (Hwy 101 to Miller Ave / Princevalle St, Leavesley Rd / Welburn Ave to 10th St). The district starts from a rough polygon along those streets; refine it lot by lot in Edit mode and export the result.",
+ "regions": [
+  {
+   "id": 1,
+   "kind": "district",
+   "name": "Oldtown",
+   "color": "#1a202c",
+   "status": "active",
+   "members": [],
+   "seed_polygon": [
+    [-121.5872, 37.0152], [-121.5738, 37.0152], [-121.5738, 37.0196], [-121.5585, 37.0198],
+    [-121.5505, 36.9990], [-121.5817, 36.9983], [-121.5817, 37.0062], [-121.5872, 37.0062], [-121.5872, 37.0152]
+   ]
+  }
+ ]
+}

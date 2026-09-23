@@ -1,10 +1,13 @@
 // PNG export composer: off-screen Leaflet map at a chosen size/bounds, legend card, combined image.
 import { TILE_URL, TILE_ATTRIBUTION } from "./config.js";
-import { state, visibleRegionIds, regionColor, regionName, displayNumber } from "./state.js";
-import { regionStats, benchmark, fmtPop, fmtArea, fmtDensity } from "./stats.js";
-import { map, dissolveRegion, labelPoint, labelIcon, regionBounds } from "./render.js";
-import { $, cumulativeHtml, setStatus } from "./ui.js";
-import { addTransitToExport } from "./transit.js";
+import { state, visibleRegionIds, regionColor, regionName, displayNumber, isDistrict, districtId, region } from "./state.js";
+import { regionStats, fmtPop, fmtInt, fmtAcres, fmtDensity } from "./stats.js";
+import { map, dissolveRegion, labelPoint, labelIcon, regionBounds, escapeHtml } from "./render.js";
+import { $, cumulativeHtml, setStatus, selectedRegion, comparisonTable } from "./ui.js";
+
+// A "sheet" export shows one neighborhood (plus the district outline) with its numbers: the starter-kit map.
+let sheetId = null;
+const exportRegionIds = () => (sheetId ? [districtId(), sheetId].filter(Boolean) : visibleRegionIds());
 
 // ---- inputs -------------------------------------------------------------------------
 
@@ -23,13 +26,13 @@ function customBounds() {
 }
 
 function highlightedBounds() {
-  const b = regionBounds(visibleRegionIds());
+  const b = regionBounds(sheetId ? [sheetId] : visibleRegionIds().filter((id) => !isDistrict(id) || visibleRegionIds().length === 1));
   if (!b.isValid()) throw new Error("No highlighted region geometry is available.");
   return b;
 }
 
 function exportBounds() {
-  const type = $("exportExtent").value;
+  const type = sheetId ? "highlighted" : $("exportExtent").value;
   if (type === "current") return map.getBounds();
   if (type === "custom") return customBounds();
   return highlightedBounds().pad(+$("exportPadding").value || 0);
@@ -46,14 +49,19 @@ function exportDimensions() {
 // ---- rendering -----------------------------------------------------------------------
 
 function addExportRegions(em) {
-  const scale = +$("exportLabelScale").value || 1;
-  for (const id of visibleRegionIds()) {
-    const { fts, display } = dissolveRegion(id);
-    if (!fts.length) continue;
-    for (const ft of display) {
-      L.geoJSON(ft, { style: { color: regionColor(id), weight: 3, opacity: 1, fillColor: regionColor(id), fillOpacity: 0.66 }, interactive: false }).addTo(em);
-    }
-    const pt = labelPoint(display, fts);
+  // Labels are sized in CSS pixels; scale them with the output so they stay readable on large images.
+  const size = em.getSize();
+  const scale = (+$("exportLabelScale").value || 1) * Math.max(1, Math.min(3, Math.max(size.x, size.y) / 700));
+  for (const id of exportRegionIds()) {
+    const { display } = dissolveRegion(id);
+    if (!display.length) continue;
+    const c = regionColor(id);
+    const style = isDistrict(id)
+      ? { color: c, weight: 4, opacity: 0.9, dashArray: "12 8", fill: false }
+      : { color: c, weight: 3.5, opacity: 1, fillColor: c, fillOpacity: sheetId ? 0.18 : 0.26 };
+    for (const ft of display) L.geoJSON(ft, { style, interactive: false }).addTo(em);
+    if (isDistrict(id)) continue;
+    const pt = labelPoint(display);
     if (pt) L.marker(pt, { icon: labelIcon(id, scale), interactive: false }).addTo(em);
   }
 }
@@ -81,7 +89,6 @@ async function captureMap(w, h, bounds) {
     em.fitBounds(bounds, { animate: false, padding: [0, 0] });
     em.invalidateSize(false);
     addExportRegions(em);
-    addTransitToExport(em);
     await waitForTiles(tiles);
     await new Promise((r) => setTimeout(r, 450));
     return await html2canvas(host, { scale: 1, useCORS: true, allowTaint: false, backgroundColor: "#edf1f3", logging: false, imageTimeout: 30000, width: w, height: h });
@@ -94,17 +101,26 @@ async function captureMap(w, h, bounds) {
 function buildLegendCard() {
   const card = document.createElement("div");
   card.className = "export-card";
-  const b = benchmark();
-  const rows = visibleRegionIds().map((id) => {
+  if (sheetId) {
+    const r = region(sheetId);
+    card.innerHTML = `<h2>${escapeHtml(regionName(sheetId))}</h2>
+      <div class="subtitle">A neighborhood of ${escapeHtml(state.setName)}${r.meets ? ` · meets ${escapeHtml(r.meets)}` : ""}</div>
+      ${comparisonTable(sheetId, { compact: true })}
+      ${r.notes ? `<div class="enotes"><b>Notes</b><br>${escapeHtml(r.notes)}</div>` : ""}
+      <div class="efoot">Residents and homes are estimates: 2020 Census block counts spread over each block's residential lots. Land is gross acres (streets included).</div>`;
+    document.body.appendChild(card);
+    return card;
+  }
+  const rows = visibleRegionIds().filter((id) => !isDistrict(id)).map((id) => {
     const st = regionStats(id);
     return `<div class="erow"><span class="eswatch" style="background:${regionColor(id)}"></span><div>
-      <div class="ename">${displayNumber(id)}. ${regionName(id)}</div>
-      <div class="emeta">${fmtPop(st.population)} · ${fmtArea(st.land_sqmi)} · ${fmtDensity(st.density)} · ${st.tracts} tracts</div></div></div>`;
+      <div class="ename">${displayNumber(id)}. ${escapeHtml(regionName(id))}</div>
+      <div class="emeta">${fmtPop(st.pop)} · ${fmtInt(st.hu)} homes · ${fmtAcres(st.acres)} · ${fmtDensity(st.density_acre)}</div></div></div>`;
   }).join("");
-  card.innerHTML = `<h2>${state.setName}</h2>
-    <div class="subtitle">${b.name} · population · land area · density · tract count</div>
+  card.innerHTML = `<h2>${escapeHtml(state.setName)}</h2>
+    <div class="subtitle">Neighborhoods · estimated residents · homes · land · density</div>
     <div class="cumexport">${cumulativeHtml(true)}</div>${rows}
-    <div class="efoot">Whole 2020 Census tracts. Population and land area: 2020 Census. Unassigned tracts are omitted. Benchmark: ${b.name} 2020 Census totals.</div>`;
+    <div class="efoot">Residents and homes are estimates from 2020 Census blocks spread over residential lots. Land is gross acres (streets included). Neighborhoods may overlap; combined figures count each lot once.</div>`;
   document.body.appendChild(card);
   return card;
 }
@@ -142,17 +158,34 @@ function combinedMapDimensions(legendCanvas, bounds) {
 }
 
 function setBusy(on) {
-  for (const id of ["exportMapPngBtn", "exportLegendPngBtn", "exportBothPngBtn"]) $(id).disabled = on;
+  for (const id of ["exportMapPngBtn", "exportLegendPngBtn", "exportBothPngBtn", "exportSheetBtn"]) $(id).disabled = on;
   if (on) setStatus("Rendering high-resolution PNG…");
 }
 
 const slug = () => (state.setName || "regions").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
 
-async function run(label, fn) {
+async function run(label, fn, sheet = null) {
   setBusy(true);
+  sheetId = sheet;
   try { await fn(); setStatus("PNG export finished."); }
   catch (e) { alert(`Could not export the ${label}: ${e.message}`); setStatus(`Export failed: ${e.message}`, { error: true }); }
-  finally { setBusy(false); }
+  finally { setBusy(false); sheetId = null; }
+}
+
+async function combined(filename) {
+  const legend = await captureLegend();
+  const type = sheetId ? "highlighted" : $("exportExtent").value;
+  const bounds = type === "custom" ? customBounds() : type === "current" ? map.getBounds() : highlightedBounds().pad(+$("exportPadding").value || 0);
+  const md = combinedMapDimensions(legend, bounds);
+  const m = await captureMap(md.w, md.h, bounds);
+  const gap = 22, w = legend.width + gap + m.width, h = Math.max(legend.height, m.height);
+  const c = document.createElement("canvas");
+  c.width = w; c.height = h;
+  const x = c.getContext("2d");
+  x.fillStyle = "#ffffff"; x.fillRect(0, 0, w, h);
+  x.drawImage(legend, 0, Math.round((h - legend.height) / 2));
+  x.drawImage(m, legend.width + gap, Math.round((h - m.height) / 2));
+  downloadCanvas(c, filename);
 }
 
 export function wireExport() {
@@ -173,19 +206,10 @@ export function wireExport() {
   $("exportLegendPngBtn").onclick = () => run("legend PNG", async () => {
     downloadCanvas(await captureLegend(), `${slug()}_legend.png`);
   });
-  $("exportBothPngBtn").onclick = () => run("combined PNG", async () => {
-    const legend = await captureLegend();
-    const type = $("exportExtent").value;
-    const bounds = type === "custom" ? customBounds() : type === "current" ? map.getBounds() : highlightedBounds().pad(+$("exportPadding").value || 0);
-    const md = combinedMapDimensions(legend, bounds);
-    const m = await captureMap(md.w, md.h, bounds);
-    const gap = 22, w = legend.width + gap + m.width, h = Math.max(legend.height, m.height);
-    const c = document.createElement("canvas");
-    c.width = w; c.height = h;
-    const x = c.getContext("2d");
-    x.fillStyle = "#ffffff"; x.fillRect(0, 0, w, h);
-    x.drawImage(legend, 0, Math.round((h - legend.height) / 2));
-    x.drawImage(m, legend.width + gap, Math.round((h - m.height) / 2));
-    downloadCanvas(c, `${slug()}_map_and_legend.png`);
-  });
+  $("exportBothPngBtn").onclick = () => run("combined PNG", () => combined(`${slug()}_map_and_legend.png`));
+  $("exportSheetBtn").onclick = () => {
+    const id = selectedRegion();
+    if (!id || isDistrict(id)) { alert("Click a neighborhood's name in the list first."); return; }
+    run("neighborhood sheet", () => combined(`${slug()}_${regionName(id).toLowerCase().replace(/[^a-z0-9]+/g, "_")}_sheet.png`), id);
+  };
 }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Density + Transit Explorer</title>
+<title>OGNA Neighborhood Map</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="css/app.css">
@@ -13,43 +13,38 @@
 
 <div class="panel">
   <div class="panel-head">
-    <h1 id="appTitle">Density + Transit Explorer</h1>
-    <div class="sub" id="appSubtitle">Hidden-density regions: clusters of census tracts whose combined density far exceeds the area average, shown with current and future rapid-transit corridors.</div>
+    <h1>Oldtown Gilroy Neighborhood Alliance</h1>
+    <div class="sub">Organizing map: the Oldtown district, its neighborhoods (which may overlap), and who lives on each lot.</div>
   </div>
 
   <div class="toolbar">
-    <button id="presentationBtn" class="active">Presentation</button>
-    <button id="auditBtn">Audit tracts</button>
-    <button id="editBtn">Edit regions</button>
+    <button id="presentationBtn" class="active">Map</button>
+    <button id="auditBtn">Lots</button>
+    <button id="editBtn">Edit</button>
     <button id="allBtn">Show all</button>
-    <button id="fitBtn">Fit regions</button>
-    <button id="resetViewBtn">Reset view</button>
+    <button id="fitBtn">Fit all</button>
+    <button id="resetViewBtn">District</button>
   </div>
 
   <div id="status" class="status">Loading…</div>
 
-  <details class="section" id="areaSection" open>
-    <summary>Study area</summary>
-    <div class="section-body">
-      <div class="area-grid">
-        <select id="areaSelect"></select>
-        <button id="loadAllBtn" title="Download tract geometry for every California county">Load all CA</button>
-      </div>
-      <div id="areaStatus" class="area-status">Loading county index…</div>
-      <div class="area-help">The study area sets the benchmark for population and land shares. Tract geometry loads per county as you pan and zoom in; regions may span counties.</div>
-    </div>
-  </details>
-
   <details class="section" id="editorSection" open hidden>
-    <summary>Region editor</summary>
+    <summary>Edit the district and neighborhoods</summary>
     <div class="section-body">
       <div class="editor-grid">
-        <select id="activeRegion"></select>
+        <select id="activeRegion" title="Clicks add or remove lots in this one"></select>
+        <input id="colorInput" type="color" title="Colour">
         <button id="newRegionBtn">+ New</button>
       </div>
       <div id="newRegionRow" class="newrow">
-        <input id="newRegionName" placeholder="New region name">
+        <input id="newRegionName" placeholder="Name, e.g. Church Street">
+        <select id="newRegionKind"><option value="neighborhood">Neighborhood</option><option value="district">District</option></select>
         <button id="createRegionBtn">Create</button>
+      </div>
+      <div class="editor-actions">
+        <button id="selectAddBtn" title="Draw a polygon; lots inside are added">Select area: add</button>
+        <button id="selectRemoveBtn" title="Draw a polygon; lots inside are removed">Select area: remove</button>
+        <button id="renameBtn">Rename</button>
       </div>
       <div class="editor-actions">
         <button id="undoBtn" disabled>Undo</button>
@@ -57,53 +52,80 @@
         <button id="resetEditsBtn" disabled>Reset edits</button>
       </div>
       <div class="editor-actions">
-        <button id="exportBtn">Export JSON</button>
-        <button id="importBtn">Import JSON</button>
         <button id="saveBtn">Save browser</button>
+        <button id="loadBtn">Load saved</button>
+        <button id="deleteRegionBtn">Delete</button>
       </div>
       <div class="editor-actions">
-        <button id="loadBtn">Load saved</button>
-        <button id="renameBtn">Rename</button>
-        <button id="deleteRegionBtn">Delete region</button>
+        <button id="exportBtn" title="Everything, including coordinators and contacts">Export JSON</button>
+        <button id="exportPublicBtn" title="Without coordinators and contact details">Export public</button>
+        <button id="importBtn">Import JSON</button>
       </div>
       <input id="importFile" type="file" accept="application/json,.json" hidden>
-      <div class="editor-help">Choose a destination region, then click any tract. Choose <b>Unassigned</b> to remove a tract from its region. Moving a tract between regions is allowed. <b>Delete region</b> turns its tracts into ordinary unassigned tracts and renumbers the rest. <b>Save browser</b> keeps a quick local copy; <b>Export JSON</b> writes a portable region-set file that <b>Import JSON</b> reads back (older v3/v4 exports are accepted too).</div>
-      <div id="editorStats" class="editor-stats">Choose a region to edit.</div>
-      <div id="tractInfo" class="tract-info">Hover or click a tract to inspect it.</div>
+      <div class="editor-help">Choose a neighborhood (or the district) above, then click lots to add or remove them. A lot can be in several neighborhoods. <b>Select area</b> draws a polygon: click corners, then double-click. <b>Save browser</b> keeps a copy here and is restored automatically. <b>Export JSON</b> writes a file you can share or commit; <b>Export public</b> leaves out coordinators and contacts.</div>
+      <div id="editorStats" class="editor-stats">Choose a neighborhood to edit.</div>
+      <div id="lotInfo" class="tract-info">Hover a lot to inspect it.</div>
     </div>
   </details>
 
   <details class="section" id="regionsSection" open>
-    <summary>Regions · population · area · density</summary>
+    <summary>District and neighborhoods</summary>
     <div class="section-body">
-      <div id="cumulativeStats" class="cumulative"><div class="cumulative-title">Highlighted regions combined</div><div>Calculating…</div></div>
+      <div id="cumulativeStats" class="cumulative"><div class="cumulative-title">Organizing coverage</div><div>Calculating…</div></div>
       <div id="legend"></div>
-      <div id="modeNote" class="mode-note">Uncheck any region to isolate the others. Click a region tract for details.</div>
+      <div id="modeNote" class="mode-note"></div>
     </div>
   </details>
 
-  <details class="section" id="transitSection" open>
-    <summary>Transit overlay</summary>
+  <details class="section" id="detailsSection" open>
+    <summary>Details and comparison</summary>
+    <div class="section-body"><div id="details"></div></div>
+  </details>
+
+  <details class="section" id="shadeSection" open>
+    <summary>Shade the map</summary>
     <div class="section-body">
-      <div id="transitGroups"></div>
-      <div class="transit-legend">
-        <span class="transit-key"><span class="linekey"></span>Rail / BRT</span>
-        <span class="transit-key"><span class="linekey commuter"></span>Commuter rail</span>
-        <span class="transit-key"><span class="linekey future"></span>Construction / planning</span>
-        <span class="transit-key"><span class="stationkey"></span>Station</span>
+      <div class="shade-grid">
+        <select id="metricSelect">
+          <option value="none">No shading</option>
+          <option value="density">Residents per acre (est.)</option>
+          <option value="hu_acre">Homes per acre (est.)</option>
+          <option value="pop">Residents per lot (est.)</option>
+          <option value="renter">Renter share (census block)</option>
+          <option value="use">Land use</option>
+          <option value="year">Year built</option>
+          <option value="tax">Property tax per lot</option>
+          <option value="tax_sqft">Property tax per sq ft of lot</option>
+          <option value="coverage">Neighborhood coverage</option>
+        </select>
+        <span class="seg"><label><input type="radio" name="unit" id="unitLots" checked> Lots</label><label><input type="radio" name="unit" id="unitBlocks"> Blocks</label></span>
       </div>
-      <div id="transitStatus" class="transit-status">Loading transit layers…</div>
+      <div id="metricLegend" class="metric-legend"></div>
+    </div>
+  </details>
+
+  <details class="section" id="taxSection">
+    <summary>Property tax data (private)</summary>
+    <div class="section-body">
+      <div id="taxStatus" class="note">No tax roll loaded.</div>
+      <div class="export-actions" style="margin-top:7px">
+        <button id="taxImportBtn">Import tax roll (CSV)</button>
+        <button id="clearTaxBtn" disabled>Remove</button>
+      </div>
+      <input id="taxFile" type="file" accept=".csv,.txt,.tsv,.xlsx,.xls,text/csv" hidden>
+      <div id="taxMapping" class="tax-mapping" hidden></div>
+      <div class="note">The file never leaves this computer. Only the parcel number and dollar columns are kept, in this browser. A <b>tax</b> column gives actual bills. With only assessed values, tax is estimated at the Gilroy rate set in <code>js/config.js</code>.</div>
     </div>
   </details>
 
   <details class="section" id="exportSection">
-    <summary>Export composer</summary>
+    <summary>Export images</summary>
     <div class="section-body">
       <div class="export-composer">
         <div class="row">
           <label>Map area
             <select id="exportExtent">
-              <option value="highlighted">Fit highlighted regions</option>
+              <option value="highlighted">Fit shown neighborhoods</option>
               <option value="current">Current map view</option>
               <option value="custom">Custom bounds</option>
             </select>
@@ -113,7 +135,7 @@
               <option value="1920x1080">HD · 1920×1080</option>
               <option value="2560x1440" selected>QHD · 2560×1440</option>
               <option value="3840x2160">4K · 3840×2160</option>
-              <option value="5000x3500">Print · 5000×3500</option>
+              <option value="3300x2550">Letter print · 3300×2550</option>
               <option value="custom">Custom pixels</option>
             </select>
           </label>
@@ -123,7 +145,7 @@
           <label>Height (px)<input id="exportHeight" type="number" min="600" max="8000" value="1440"></label>
         </div>
         <div class="row">
-          <label>Region padding
+          <label>Padding
             <select id="exportPadding">
               <option value="0.02">Tight · 2%</option>
               <option value="0.06" selected>Normal · 6%</option>
@@ -134,14 +156,14 @@
             <select id="exportLabelScale">
               <option value="0.9">Small</option>
               <option value="1" selected>Normal</option>
-              <option value="1.2">Large</option>
+              <option value="1.3">Large</option>
             </select>
           </label>
         </div>
         <div class="row">
           <label>Combined layout
             <select id="combinedLayout">
-              <option value="compact" selected>Compact / tight</option>
+              <option value="compact" selected>Compact</option>
               <option value="balanced">Balanced</option>
               <option value="wide">Wider map</option>
             </select>
@@ -156,26 +178,28 @@
         </div>
         <div class="export-actions" style="margin-top:7px">
           <button id="useCurrentBoundsBtn">Use current view as custom</button>
-          <button id="useHighlightedBoundsBtn">Use highlighted bounds</button>
+          <button id="useHighlightedBoundsBtn">Use shown bounds</button>
         </div>
-        <div class="export-preview">Export is rendered on a separate off-screen map, so its framing and resolution are independent of your browser window.</div>
       </div>
       <div class="export-actions" style="margin-top:9px">
         <button id="exportMapPngBtn">Map PNG</button>
         <button id="exportLegendPngBtn">Legend PNG</button>
         <button id="exportBothPngBtn">Map + legend</button>
       </div>
-      <div class="export-note">Map exports use a dedicated off-screen Leaflet map at the selected pixel size and geographic bounds. Larger output sizes make Leaflet request more detailed tiles instead of enlarging a screenshot.</div>
+      <div class="export-actions" style="margin-top:6px">
+        <button id="exportSheetBtn" title="The selected neighborhood with its numbers, for a starter kit">Neighborhood sheet</button>
+      </div>
+      <div class="export-note">Images are drawn on a separate off-screen map, so framing and resolution don't depend on your window. <b>Neighborhood sheet</b> exports the neighborhood selected in the list, with its comparison table.</div>
     </div>
   </details>
 
-  <div class="foot" id="footNote">
-    Population and land area: 2020 Census (P.L. 94-171 population, TIGER land area) for every California tract. Tract geometry: Census cartographic boundary files (1:500k) statewide, with street-accurate TIGER/Line geometry for the Los Angeles and Bay Area preset counties. Current Metro rail and stations load from public ArcGIS feature services; future corridors are planning-level schematic alignments and are drawn dashed. The shipped region set is never overwritten; edits live in your browser or in exported JSON.
+  <div class="foot">
+    Residents and homes: 2020 Census blocks (P.L. 94-171 / DHC), spread over each block's residential lots, so single-lot values are estimates. The Census also adds privacy noise to block counts, so trust groups of blocks more than one block. Lots: Santa Clara County parcel layer. Land is gross acres, streets included. Neighborhood edits live in your browser or in exported JSON; tax data stays in this browser.
   </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.4.0/turf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script type="module" src="js/main.js"></script>
 </body>

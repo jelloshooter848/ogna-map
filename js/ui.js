@@ -1,7 +1,9 @@
-// Side-panel DOM: status line, legend, cumulative card, editor stats, mode UI.
-import { state, scopedRegionIds, regionName, regionColor, displayNumber, isHidden, setHidden, canUndo, canRedo, assignedCount } from "./state.js";
-import { regionStats, statsForTracts, cumulativeStats, tractStats, fmtPop, fmtArea, fmtDensity, fmtInt, fmtPct, signed } from "./stats.js";
-import { syncRegionVisibility, tractCode } from "./render.js";
+// Side-panel DOM: status line, coverage card, region list, comparison table, organizing details, lot info.
+import { STATUSES } from "./config.js";
+import { state, regionIds, regionName, regionColor, displayNumber, isHidden, setHidden, canUndo, canRedo, assignedCount, isDistrict, districtId, region, membersOf } from "./state.js";
+import { regionStats, districtStats, cityStats, cumulativeStats, coverage, fmtInt, fmtPop, fmtAcres, fmtDensity, fmtPct, fmtMoney } from "./stats.js";
+import { syncRegionVisibility, lotSummary, metricLegend, METRICS, view, escapeHtml } from "./render.js";
+import { taxRollInfo } from "./units.js";
 
 export const $ = (id) => document.getElementById(id);
 
@@ -9,80 +11,141 @@ export function setStatus(html, { error = false } = {}) {
   $("status").innerHTML = error ? `<span class="error">${html}</span>` : html;
 }
 export function workingCopyStatus() {
-  return `Editor working copy · ${assignedCount().toLocaleString()} assigned tracts${state.dirty ? ' · <span class="dirty">unsaved changes</span>' : ""}.`;
+  return `${assignedCount().toLocaleString()} lots in the district or a neighborhood${state.dirty ? ' · <span class="dirty">unsaved changes</span> (Save browser or Export JSON)' : ""}.`;
 }
 
-// ---- legend -------------------------------------------------------------------
+// ---- region list -------------------------------------------------------------------------------------
+
+let selected = null;
+const onSelect = [];
+export function selectedRegion() { return selected && state.regions[selected] ? selected : null; }
+export function onRegionSelected(fn) { onSelect.push(fn); }
+export function selectRegion(id) {
+  selected = id ? String(id) : null;
+  rebuildLegend();
+  for (const fn of onSelect) fn(selected);
+}
+
+const STATUS_LABEL = { idea: "idea", forming: "forming", active: "active", dormant: "dormant" };
 
 function legendRow(id) {
-  const s = regionStats(id);
-  const pct = s.density ? Math.max(7, (100 * s.density) / 25000) : 7;
-  return `<span class="swatch" style="background:${regionColor(id)}"></span>
-    <input type="checkbox" id="r${id}" ${isHidden(id) ? "" : "checked"}>
-    <label for="r${id}"><b>${displayNumber(id)}. ${regionName(id)}</b>
-      <span class="meta">${fmtPop(s.population)} · ${fmtArea(s.land_sqmi)} · ${fmtDensity(s.density)} · ${s.tracts} tracts</span>
-      <span class="densitybar"><span style="width:${Math.min(100, pct)}%;background:${regionColor(id)}"></span></span>
-    </label>`;
+  const s = regionStats(id), r = region(id);
+  const chip = isDistrict(id) ? '<span class="chip district">district</span>' : `<span class="chip s-${r.status}">${STATUS_LABEL[r.status]}</span>`;
+  return `<span class="swatch${isDistrict(id) ? " dashed" : ""}" style="--c:${regionColor(id)}"></span>
+    <input type="checkbox" id="r${id}" ${isHidden(id) ? "" : "checked"} title="Show on map">
+    <button class="rname" data-id="${id}"><b>${isDistrict(id) ? "" : displayNumber(id) + ". "}${escapeHtml(regionName(id))}</b> ${chip}
+      <span class="meta">${fmtPop(s.pop)} · ${fmtInt(s.hu)} homes · ${fmtAcres(s.acres)} · ${fmtDensity(s.density_acre)} · ${s.lots.toLocaleString()} lots</span>
+    </button>`;
 }
 
 export function rebuildLegend() {
   const legend = $("legend");
   legend.innerHTML = "";
-  const ids = scopedRegionIds();
-  if (!ids.length) legend.innerHTML = `<div class="legend-empty">No regions in this study area yet. Switch to <b>Edit regions</b>, create a region, and click tracts to build one.</div>`;
+  const ids = regionIds();
+  if (!ids.some((id) => !isDistrict(id))) {
+    legend.insertAdjacentHTML("beforeend", `<div class="legend-empty">No neighborhoods yet. Switch to <b>Edit</b>, press <b>+ New</b>, then click lots or use <b>Select area</b>.</div>`);
+  }
   for (const id of ids) {
     const row = document.createElement("div");
-    row.className = "region";
+    row.className = "region" + (selected === id ? " selected" : "");
     row.innerHTML = legendRow(id);
     legend.appendChild(row);
     const cb = row.querySelector("input");
     cb.onchange = () => { setHidden(id, !cb.checked); syncRegionVisibility(id); updateCumulative(); };
+    row.querySelector(".rname").onclick = () => selectRegion(selected === id ? null : id);
   }
   populateRegionSelect();
   updateCumulative();
+  updateDetails();
 }
 
 export function populateRegionSelect() {
   const sel = $("activeRegion"), cur = sel.value;
-  sel.innerHTML = '<option value="0">Unassigned (remove from region)</option>' +
-    scopedRegionIds().map((id) => `<option value="${id}">${displayNumber(id)}. ${regionName(id)}</option>`).join("");
+  sel.innerHTML = regionIds().map((id) => `<option value="${id}">${isDistrict(id) ? "District: " : displayNumber(id) + ". "}${escapeHtml(regionName(id))}</option>`).join("");
   if ([...sel.options].some((o) => o.value === cur)) sel.value = cur;
+  else if (selectedRegion()) sel.value = selectedRegion();
+  else { const first = regionIds().find((id) => !isDistrict(id)); if (first) sel.value = first; }
   updateEditorStats();
 }
 
-// ---- editor panel ---------------------------------------------------------------
+// ---- comparison table ------------------------------------------------------------------------------------
+
+const ROWS = [
+  ["Residents (est.)", (s) => fmtInt(s.pop)],
+  ["Homes (housing units)", (s) => fmtInt(s.hu)],
+  ["Households", (s) => fmtInt(s.occ)],
+  ["Renter households", (s) => fmtPct(s.renter_share)],
+  ["People per household", (s) => (Number.isFinite(s.hh_size) ? s.hh_size.toFixed(2) : "—")],
+  ["Children (under 18)", (s) => (Number.isFinite(s.minors) && s.pop > 0 ? fmtPct(s.minors / s.pop) : "—")],
+  ["Land (gross acres)", (s) => fmtAcres(s.acres)],
+  ["Residents per acre", (s) => (Number.isFinite(s.density_acre) ? s.density_acre.toFixed(1) : "—")],
+  ["Residents per sq mi", (s) => fmtInt(s.density_sqmi)],
+  ["Homes per acre", (s) => (Number.isFinite(s.hu_acre) ? s.hu_acre.toFixed(1) : "—")],
+  ["Lots", (s) => (s.lots === null ? "—" : fmtInt(s.lots))],
+  ["Property tax", (s) => (s.has_tax ? fmtMoney(s.tax) + (s.tax_complete ? "" : "*") : "—")],
+  ["Tax per resident", (s) => (s.tax_per_capita ? fmtMoney(s.tax_per_capita) : "—")],
+  ["Tax per sq ft of lot", (s) => (s.tax_per_sqft ? "$" + s.tax_per_sqft.toFixed(2) : "—")],
+];
+
+export function comparisonTable(id, { compact = false } = {}) {
+  const cols = [];
+  if (id && !isDistrict(id)) cols.push([regionName(id), regionStats(id)]);
+  const d = districtId();
+  if (d) cols.push([regionName(d), districtStats()]);
+  cols.push(["Gilroy", cityStats()]);
+  const rows = compact ? ROWS.filter((r) => !/Children|sq mi|Lots/.test(r[0])) : ROWS;
+  const partial = cols.some(([, s]) => s.has_tax && !s.tax_complete);
+  return `<table class="cmp"><thead><tr><th></th>${cols.map(([n]) => `<th>${escapeHtml(n)}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map(([label, f]) => `<tr><td>${label}</td>${cols.map(([, s]) => `<td>${f(s)}</td>`).join("")}</tr>`).join("")}</tbody></table>
+    ${partial ? '<div class="note">* Only lots found in the imported tax roll are counted; per-resident and per-sq-ft figures use those lots only.</div>' : ""}`;
+}
+
+// ---- details card ---------------------------------------------------------------------------------------
+
+export function updateDetails() {
+  const el = $("details");
+  const id = selectedRegion() || districtId();
+  if (!id) { el.innerHTML = "<div class='muted'>No district defined yet.</div>"; return; }
+  const r = region(id);
+  const s = regionStats(id);
+  const meta = isDistrict(id) ? "" : `
+    <div class="meta-grid">
+      <label>Status<select data-k="status">${STATUSES.map((x) => `<option ${x === r.status ? "selected" : ""}>${x}</option>`).join("")}</select></label>
+      <label>Meets<input data-k="meets" value="${escapeHtml(r.meets)}" placeholder="e.g. 2nd Tuesday, 7pm"></label>
+      <label>Coordinators <span class="private">private</span><input data-k="coordinators" value="${escapeHtml(r.coordinators)}" placeholder="names"></label>
+      <label>Contact <span class="private">private</span><input data-k="contact" value="${escapeHtml(r.contact)}" placeholder="group chat, email list…"></label>
+      <label class="wide">Notes: concerns, opportunities<textarea data-k="notes" rows="2">${escapeHtml(r.notes)}</textarea></label>
+    </div>`;
+  el.innerHTML = `<div class="details-head"><span class="swatch${isDistrict(id) ? " dashed" : ""}" style="--c:${regionColor(id)}"></span>
+      <b>${isDistrict(id) ? "" : displayNumber(id) + ". "}${escapeHtml(regionName(id))}</b>
+      <span class="muted">· ${s.lots.toLocaleString()} lots</span></div>
+    ${meta}${comparisonTable(id)}`;
+  for (const input of el.querySelectorAll("[data-k]")) {
+    input.onchange = () => { for (const fn of metaHandlers) fn(id, { [input.dataset.k]: input.value }); };
+  }
+}
+const metaHandlers = [];
+export function onMetaChange(fn) { metaHandlers.push(fn); }
+
+// ---- editor panel ---------------------------------------------------------------------------------------
 
 export function updateEditorStats() {
   const id = $("activeRegion")?.value;
   const el = $("editorStats");
-  if (!id || id === "0") {
-    el.innerHTML = "<b>Unassigned</b><br>Clicking a tract removes it from its current region but keeps it available on the map.";
-    return;
-  }
+  if (!id || !state.regions[id]) { el.innerHTML = "Create a neighborhood with <b>+ New</b> to start."; return; }
   const s = regionStats(id);
   let delta = "";
   const base = state.baseline?.regions.find((r) => r.id === Number(id));
-  if (base && Number.isFinite(s.density)) {
-    const b = statsForTracts(base.tracts);
-    delta = `<br>vs. baseline: ${signed(s.tracts - b.tracts)} tracts · ${signed(s.population - b.population)} people · ${signed(s.land_sqmi - b.land_sqmi, 2)} sq mi · ${signed(s.density - (b.density || 0))}/sq mi`;
-  } else if (!base) {
-    delta = "<br>New region (not in the baseline).";
-  }
-  el.innerHTML = `<b>${displayNumber(id)}. ${regionName(id)}</b><br>${fmtPop(s.population)} · ${fmtArea(s.land_sqmi)} · ${fmtDensity(s.density)} · ${s.tracts} tracts${delta}`;
+  if (base) {
+    const d = membersOf(id).size - base.members.length;
+    if (d) delta = ` · ${d > 0 ? "+" : ""}${d} lots vs. saved start`;
+  } else delta = " · new";
+  el.innerHTML = `<b>${isDistrict(id) ? "District" : displayNumber(id) + "."} ${escapeHtml(regionName(id))}</b><br>${fmtPop(s.pop)} · ${fmtInt(s.hu)} homes · ${fmtAcres(s.acres)} · ${fmtDensity(s.density_acre)} · ${s.lots} lots${delta}`;
 }
 
-/** Tract hover/click readout. `move` = { from, to } region ids (0 = unassigned) after an edit. */
-export function showTractInfo(geoid, move = null) {
-  const s = tractStats(geoid), rid = state.assignment[geoid] || 0;
-  const where = rid ? `Region ${displayNumber(rid)}: ${regionName(rid)}` : "Unassigned";
-  const density = Number.isFinite(s.population) && s.land_sqmi > 0 ? ` · ${fmtInt(s.population / s.land_sqmi)}/sq mi` : "";
-  const label = state.tractLabels[geoid] ? ` · ${state.tractLabels[geoid]}` : "";
-  let moved = "";
-  if (move) {
-    const name = (r) => (r ? `Region ${displayNumber(r)}` : "Unassigned");
-    moved = `<br>Moved from ${name(move.from)} → ${name(move.to)}.`;
-  }
-  $("tractInfo").innerHTML = `<b>Tract ${tractCode(geoid)}</b> · ${where}${label}<br>${fmtPop(s.population)} · ${fmtArea(s.land_sqmi)}${density}${moved}`;
+export function showLotInfo(apn, note = "") {
+  const s = lotSummary(apn);
+  $("lotInfo").innerHTML = `<b>${s.title}</b><br>${s.lines.join("<br>")}${note ? `<br><span class="dirty">${note}</span>` : ""}`;
 }
 
 export function updateHistoryButtons() {
@@ -91,54 +154,54 @@ export function updateHistoryButtons() {
   $("resetEditsBtn").disabled = !state.dirty;
 }
 
-// ---- cumulative card ---------------------------------------------------------------
+// ---- coverage / combined card ------------------------------------------------------------------------------
 
 export function cumulativeHtml(exportMode = false) {
-  const s = cumulativeStats(), b = s.benchmark;
-  const titleCls = exportMode ? "cumtitle" : "cumulative-title";
-  if (!s.ids.length) return `<div class="${titleCls}">Highlighted regions combined</div><div>No regions highlighted.</div>`;
-  const dens = s.density ? `${fmtInt(s.density)}/sq mi` : "pending";
-  const mult = s.density_multiple ? `${s.density_multiple.toFixed(1)}×` : "—";
-  if (exportMode) {
-    return `<div class="cumtitle">Highlighted regions combined</div>
-      <div class="cumgrid">
-        <div><div class="cumv">${fmtPop(s.population)}</div><div class="cumk">Population · ${fmtPct(s.pop_share)} of ${b.name}</div></div>
-        <div><div class="cumv">${fmtArea(s.land_sqmi)}</div><div class="cumk">Land · ${fmtPct(s.land_share)} of ${b.name}</div></div>
-        <div><div class="cumv">${dens}</div><div class="cumk">Combined density</div></div>
-        <div><div class="cumv">${mult}</div><div class="cumk">${b.name} density</div></div>
-      </div>
-      <div class="cumline"><b>${fmtPct(s.pop_share)}</b> of ${b.name}'s population lives on just <b>${fmtPct(s.land_share)}</b> of its land in the highlighted regions. ${s.tracts.toLocaleString()} census tracts are highlighted.</div>`;
-  }
-  return `<div class="cumulative-title">Highlighted regions combined</div>
-    <div class="cum-grid">
-      <div class="cum-item"><div class="v">${fmtPop(s.population)}</div><div class="k">Population · ${fmtPct(s.pop_share)} of ${b.name}</div></div>
-      <div class="cum-item"><div class="v">${fmtArea(s.land_sqmi)}</div><div class="k">Land · ${fmtPct(s.land_share)} of ${b.name}</div></div>
-      <div class="cum-item"><div class="v">${dens}</div><div class="k">Combined density</div></div>
-      <div class="cum-item"><div class="v">${mult}</div><div class="k">${b.name} density</div></div>
-    </div>
-    <div class="cum-callout"><b>${fmtPct(s.pop_share)}</b> of ${b.name}'s population in only <b>${fmtPct(s.land_share)}</b> of its land · ${s.tracts.toLocaleString()} tracts.</div>
-    <div class="county-note">Benchmark: ${b.name} · ${fmtInt(b.population)} people · ${b.land_sqmi.toFixed(2)} land sq mi · ${fmtInt(b.density)}/sq mi (2020 Census).</div>`;
+  const cov = coverage();
+  const c = cumulativeStats();
+  const covLine = cov
+    ? `<div class="cov-bar"><span style="width:${Math.round(100 * (cov.pop_share || 0))}%"></span></div>
+       <div class="cum-callout"><b>${fmtPct(cov.pop_share)}</b> of ${escapeHtml(regionName(districtId()))}'s estimated residents live in at least one neighborhood
+       (${cov.covered_lots.toLocaleString()} of ${cov.district_lots.toLocaleString()} lots, ${cov.neighborhoods} neighborhood${cov.neighborhoods === 1 ? "" : "s"}).
+       ${cov.outside_lots ? `${cov.outside_lots.toLocaleString()} neighborhood lot${cov.outside_lots === 1 ? " lies" : "s lie"} outside the district.` : ""}</div>`
+    : "";
+  const hood = c.ids.length
+    ? `<div class="cum-grid">
+        <div class="cum-item"><div class="v">${fmtInt(c.pop)}</div><div class="k">Residents in shown neighborhoods</div></div>
+        <div class="cum-item"><div class="v">${fmtInt(c.hu)}</div><div class="k">Homes</div></div>
+        <div class="cum-item"><div class="v">${fmtDensity(c.density_acre)}</div><div class="k">Combined density</div></div>
+        <div class="cum-item"><div class="v">${c.overlap_lots.toLocaleString()}</div><div class="k">Lots in 2+ neighborhoods (counted once)</div></div>
+      </div>`
+    : "";
+  const title = exportMode ? "cumtitle" : "cumulative-title";
+  return `<div class="${title}">Organizing coverage</div>${covLine}${hood}`;
 }
 export function updateCumulative() { $("cumulativeStats").innerHTML = cumulativeHtml(false); }
 
-// ---- study area -----------------------------------------------------------------------------
+// ---- metric legend -------------------------------------------------------------------------------------------
 
-/** Populate the area <select> from presets plus every individual county (grouped). */
-export function renderAreaSelect(areas, counties, currentId) {
-  const sel = $("areaSelect");
-  const presets = areas.map((a) => `<option value="${a.id}">${a.name}</option>`).join("");
-  const single = counties.map((c) => `<option value="county:${c.fips}">${c.name} County</option>`).join("");
-  sel.innerHTML = `<optgroup label="Presets">${presets}</optgroup><optgroup label="Single county">${single}</optgroup>`;
-  sel.value = currentId;
+export function updateMetricLegend() {
+  const items = metricLegend();
+  const m = METRICS[view.metric];
+  const blockNote = view.unit === "blocks" && m?.lot && !m.block ? '<div class="note">This measure is per lot. Switch to <b>Lots</b> to see it.</div>' : "";
+  const estNote = ["density", "hu_acre", "pop"].includes(view.metric) && view.unit === "lots" ? '<div class="note">Lot values spread each census block\'s 2020 count over its residential lots. Treat single lots as rough; groups of lots are more reliable.</div>' : "";
+  $("metricLegend").innerHTML = items.map((i) => `<span class="mkey"><span class="mswatch" style="background:${i.color}"></span>${escapeHtml(i.label)}</span>`).join("") + blockNote + estNote;
 }
-export function setAreaStatus(text) { $("areaStatus").textContent = text; }
 
-// ---- mode UI ---------------------------------------------------------------------------
+export function updateTaxStatus() {
+  const info = taxRollInfo();
+  $("taxStatus").innerHTML = info
+    ? `Loaded <b>${escapeHtml(info.name)}</b> · ${info.parcels.toLocaleString()} parcels · columns used: ${Object.entries(info.columns).map(([k, v]) => `${k} = “${escapeHtml(v)}”`).join(", ")} · ${info.discarded_columns} other columns discarded. Stored only in this browser.`
+    : "No tax roll loaded. Tax figures show “—” until you import one.";
+  $("clearTaxBtn").disabled = !info;
+}
+
+// ---- mode UI --------------------------------------------------------------------------------------------------
 
 const MODE_NOTES = {
-  presentation: "Presentation mode dissolves each region's tracts into one shape. Uncheck a region to isolate the others; click a tract for details.",
-  audit: "Audit mode shows individual tract boundaries from the same working assignments used by Presentation.",
-  edit: "Editor mode: click tracts to assign or unassign them, create new regions, or delete regions. Changes are reversible and never modify the shipped baseline.",
+  presentation: "Map view shows the district outline and each neighborhood. Click a lot for details; click a name in the list for its numbers.",
+  audit: "Lots view shows the outlines of every neighborhood over the individual lots. Use the shading menu to color lots by a measure.",
+  edit: "Edit: pick a neighborhood (or the district), then click lots to add or remove them, or use Select area. Lots can belong to several neighborhoods.",
 };
 
 export function setModeUI(mode) {

@@ -7,10 +7,13 @@
   "scripts": {
     "serve": "python3 -m http.server 8000",
     "build:data": "node scripts/build_gilroy.mjs",
-    "test": "node --test test/"
+    "test": "node --test test/*.test.mjs"
   },
   "devDependencies": {
     "@turf/turf": "^7.4.0",
-    "mapshaper": "^0.7.66"
+    "html2canvas": "^1.4.1",
+    "leaflet": "^1.9.4",
+    "mapshaper": "^0.7.66",
+    "playwright-core": "^1.63.0"
   }
 }
