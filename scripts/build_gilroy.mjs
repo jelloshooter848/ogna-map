@@ -48,6 +48,8 @@ const EXPECTED_GILROY_POP = 59520; // 2020 Census, Gilroy city
 const SENSITIVE = /owner|own_|taxpayer|mail|care_?of|c_o_|grantee|grantor|buyer|seller/i;
 const VALUE_FIELD = /land_?val|impr|assess|net_?val|total_?val|exempt|value|tax/i;
 
+// A real parcel layer has thousands of lots in the Oldtown box; fewer means a partial or unrelated layer.
+const MIN_LOTS = CONFIG.parcels.min_lots || 1500;
 const report = { built_at: new Date().toISOString(), stages: {}, checks: {} };
 
 // ---- helpers -------------------------------------------------------------------------------------
@@ -278,7 +280,7 @@ async function fetchArcgisParcels(layerUrl) {
   const base = { where: "1=1", geometry, geometryType: "esriGeometryEnvelope", inSR: "4326", spatialRel: "esriSpatialRelIntersects" };
   const cnt = await getJson(`${layerUrl}/query?${new URLSearchParams({ ...base, returnCountOnly: "true", f: "json" })}`);
   if (cnt.error) throw new Error("count: " + JSON.stringify(cnt.error));
-  if (!(cnt.count > 100)) throw new Error(`only ${cnt.count} features in the Oldtown box`);
+  if (!(cnt.count >= MIN_LOTS)) throw new Error(`only ${cnt.count} features in the Oldtown box`);
   const page = Math.min(meta.maxRecordCount || 1000, 2000);
   const features = [];
   for (let offset = 0; offset < cnt.count; offset += page) {
@@ -299,9 +301,11 @@ async function fetchSocrataParcels(domain, id) {
   const [w, s, e, n] = CONFIG.parcels_bbox;
   const url = `https://${domain}/resource/${id}.geojson?$where=${encodeURIComponent(`intersects(${geoCol.fieldName}, 'POLYGON((${w} ${s}, ${e} ${s}, ${e} ${n}, ${w} ${n}, ${w} ${s}))')`)}&$limit=50000`;
   const j = await getJson(url);
-  if (!(j.features?.length > 100)) throw new Error(`only ${j.features?.length} features`);
+  if (!(j.features?.length >= MIN_LOTS)) throw new Error(`only ${j.features?.length} features`);
   return { source: `https://${domain}/d/${id}`, name: view.name, fields: (view.columns || []).map((c) => ({ name: c.fieldName, type: c.dataTypeName, alias: c.name })), features: j.features };
 }
+
+const APN_PATTERNS = [/^apn$/i, /^apn_?(num|no|number)?$/i, /apn/i, /parcel_?(id|num|no|number)/i, /parcelnumber/i, /^pin$/i];
 
 function pickField(names, patterns) {
   for (const p of patterns) { const hit = names.find((n) => p.test(n)); if (hit) return hit; }
@@ -313,15 +317,23 @@ async function buildParcels() {
   report.parcel_discovery = { candidates: candidates.slice(0, 40), log: log.slice(0, 80) };
   let got = null;
   const attempts = [];
+  // Accept a layer only if most of its polygons carry a parcel number.
+  const usable = (g) => {
+    const names = [...new Set(g.features.flatMap((f) => Object.keys(f.properties || {})))];
+    const apnF = (CONFIG.parcels.fields || {}).apn || pickField(names, APN_PATTERNS);
+    const filled = apnF ? g.features.filter((f) => String(f.properties?.[apnF] ?? "").replace(/[^0-9A-Za-z]/g, "")).length : 0;
+    if (filled < MIN_LOTS) throw new Error(`only ${filled} of ${g.features.length} features have a parcel number (field ${apnF})`);
+    return g;
+  };
   for (const c of candidates) {
     try {
       if (c.kind === "arcgis") {
         for (const layer of await arcgisLayers(c.url)) {
-          try { got = await fetchArcgisParcels(layer); attempts.push({ layer, ok: true, n: got.features.length }); break; }
+          try { got = usable(await fetchArcgisParcels(layer)); attempts.push({ layer, ok: true, n: got.features.length }); break; }
           catch (e) { attempts.push({ layer, error: String(e).slice(0, 300) }); }
         }
       } else {
-        got = await fetchSocrataParcels(c.domain, c.id);
+        got = usable(await fetchSocrataParcels(c.domain, c.id));
         attempts.push({ socrata: c.id, ok: true, n: got.features.length });
       }
     } catch (e) { attempts.push({ candidate: c.url || c.id, error: String(e).slice(0, 300) }); }
@@ -332,7 +344,7 @@ async function buildParcels() {
 
   const names = [...new Set(got.features.flatMap((f) => Object.keys(f.properties || {})))];
   const F = CONFIG.parcels.fields || {};
-  const apnF = F.apn || pickField(names, [/^apn$/i, /^apn_?(num|no|number)?$/i, /apn/i, /parcel_?(id|num|no)/i, /^pin$/i]);
+  const apnF = F.apn || pickField(names, APN_PATTERNS);
   const useF = F.use || pickField(names, [/use_?code/i, /^luc$/i, /land_?use/i, /usecode/i, /use_?desc/i, /^use$/i]);
   const useDescF = F.use_desc || pickField(names.filter((n) => n !== useF), [/use_?desc/i, /land_?use_?desc/i, /class/i]);
   const unitsF = F.units || pickField(names, [/^units$/i, /dwell/i, /num_?units/i, /unit_?count/i, /living_?units/i]);

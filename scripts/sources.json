@@ -1,20 +1,45 @@
 {
-  "city": { "name": "Gilroy" },
+  "city": {
+    "name": "Gilroy"
+  },
   "county_fips": "06085",
-  "blocks_bbox": [-121.66, 36.94, -121.5, 37.07],
-  "parcels_bbox": [-121.605, 36.985, -121.535, 37.032],
+  "blocks_bbox": [
+    -121.66,
+    36.94,
+    -121.5,
+    37.07
+  ],
+  "parcels_bbox": [
+    -121.605,
+    36.985,
+    -121.535,
+    37.032
+  ],
   "boundary_streets": [
-    "Leavesley Road", "Welburn Avenue", "Miller Avenue", "Princevalle Street",
-    "(East |West )?10th Street", "Monterey (Road|Street)"
+    "Leavesley Road",
+    "Welburn Avenue",
+    "Miller Avenue",
+    "Princevalle Street",
+    "(East |West )?10th Street",
+    "Monterey (Road|Street)"
   ],
   "parcels": {
-    "arcgis_layers": [],
+    "arcgis_layers": [
+      "https://services8.arcgis.com/n7NW5ijV4dJUmrID/arcgis/rest/services/Parcels_view/FeatureServer",
+      "https://mapservices.sccgov.org/arcgis/rest/services/property/SCCProperty/MapServer"
+    ],
     "dcat_feeds": [
       "https://gisdata-sccplanning.hub.arcgis.com/api/feed/dcat-us/1.1.json",
       "https://data.sccgov.org/data.json"
     ],
-    "arcgis_search": ["Santa Clara County parcels", "Gilroy parcels"],
-    "socrata_domains": ["data.sccgov.org"],
-    "fields": {}
+    "arcgis_search": [
+      "Santa Clara County parcels",
+      "Gilroy parcels"
+    ],
+    "socrata_domains": [
+      "data.sccgov.org"
+    ],
+    "fields": {},
+    "min_lots": 1500
   }
 }

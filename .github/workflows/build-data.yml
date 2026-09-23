@@ -39,6 +39,8 @@ jobs:
       - name: Build data
         env:
           NODE_OPTIONS: --max-old-space-size=12288
+          # Free key from https://api.census.gov/data/key_signup.html, stored as a repository secret.
+          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
         run: node scripts/build_gilroy.mjs
       - name: Commit built data
         if: always()
