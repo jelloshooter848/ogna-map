@@ -1,0 +1,753 @@
+{
+ "built_at": "2026-09-23T01:03:26.354Z",
+ "stages": {
+  "city_limits": {
+   "ok": true,
+   "seconds": 1.089,
+   "geoid": "0629504",
+   "bbox": [
+    -121.64352,
+    36.97236,
+    -121.51869,
+    37.04823
+   ]
+  },
+  "blocks": {
+   "ok": true,
+   "seconds": 17.492,
+   "blocks": 638,
+   "city_blocks": 627,
+   "city_pop": 59520
+  },
+  "housing_detail": {
+   "ok": false,
+   "seconds": 0.439,
+   "error": "Error: https://api.census.gov/data/2020/dec/dhc?get=H3_001N,H3_002N,H4_001N,H4_004N&for=block:*&in=state:06&in=county:085&in=tract:512602: not JSON: <html style=\"font-size: 14px;\">\n\n<head>\n    <title>Missing Key</title>\n    <link rel=\"icon\" type=\"image/x-icon\" href=\"favicon.ico\">\n    <link rel=\"stylesheet\" type=\"text/css\" href=\"assets/styles.css\">\n    at getJson (file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:70:50)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async censusBlocks (file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:173:35)\n    at async addHousingDetail (file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:182:15)\n    at async stage (file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:81:20)\n    at async file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:417:1"
+  },
+  "boundary_streets": {
+   "ok": true,
+   "seconds": 8.108,
+   "ways": 240,
+   "by_name": {
+    "Monterey Road": 50,
+    "US 101 Business": 1,
+    "Miller Avenue": 10,
+    "West 10th Street": 30,
+    "Welburn Avenue": 12,
+    "East 10th Street": 14,
+    "Leavesley Road": 30,
+    "Princevalle Street": 13,
+    "South Valley Freeway": 49,
+    "Monterey Street": 31
+   }
+  },
+  "parcels": {
+   "ok": true,
+   "seconds": 8.756,
+   "source": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Parcels123/FeatureServer/0",
+   "parcels": 0,
+   "without_block": 0,
+   "value_fields": []
+  }
+ },
+ "checks": {
+  "city_population_from_blocks": 59520,
+  "city_population_expected": 59520,
+  "city_population_ratio": 1
+ },
+ "parcel_discovery": {
+  "candidates": [
+   {
+    "kind": "arcgis",
+    "url": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Ongoing_Contract)/FeatureServer/0",
+    "via": "dcat:Williamson Act Parcels With Active Contracts in Santa Clara County"
+   },
+   {
+    "kind": "arcgis",
+    "url": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Non_Renewed)/FeatureServer/0",
+    "via": "dcat:Williamson Act Non-Renewed Parcels in Santa Clara County"
+   },
+   {
+    "kind": "arcgis",
+    "url": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Open_Space_Easement_Parcels/FeatureServer/0",
+    "via": "dcat:Santa Clara County Open Space Easement Parcels"
+   },
+   {
+    "kind": "arcgis",
+    "url": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Open_Space_Easement_Parcels/FeatureServer",
+    "via": "search:Santa Clara County Open Space Easement Parcels (SCC.Planning.Office)"
+   },
+   {
+    "kind": "arcgis",
+    "url": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Ongoing_Contract)/FeatureServer",
+    "via": "search:Williamson Act Parcels With Active Contracts in Santa Clara County (SCC.Planning.Office)"
+   },
+   {
+    "kind": "arcgis",
+    "url": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Non_Renewed)/FeatureServer",
+    "via": "search:Williamson Act Non-Renewed Parcels in Santa Clara County (SCC.Planning.Office)"
+   },
+   {
+    "kind": "arcgis",
+    "url": "https://services.arcgis.com/NkcnS0qk4w2wasOJ/arcgis/rest/services/RAPParcels_DEDUP20130607_F/FeatureServer",
+    "via": "search:Parcels R&A (Sampa.Patra@isd.sccgov.org_sccgov)"
+   },
+   {
+    "kind": "arcgis",
+    "url": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Potential_SB9_Parcels_2020/FeatureServer",
+    "via": "search:Potential_SB9_Parcels_2020 (Steve.Borgstrom)"
+   },
+   {
+    "kind": "arcgis",
+    "url": "https://gis.cupertino.org/cupgis/rest/services/Public/Recorded_Map/MapServer/18",
+    "via": "search:Parcel Map Index (CupertinoGIS)"
+   },
+   {
+    "kind": "arcgis",
+    "url": "https://services.arcgis.com/NkcnS0qk4w2wasOJ/arcgis/rest/services/SCCPRDParks_revd20130607_AC/FeatureServer",
+    "via": "search:Parcels Parks PRD_AC (Sampa.Patra@isd.sccgov.org_sccgov)"
+   },
+   {
+    "kind": "arcgis",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Parcels123/FeatureServer",
+    "via": "search:Parcels123 (alope395_CalPoly)"
+   },
+   {
+    "kind": "arcgis",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Enriched_Parcels_Gilroy_jb/FeatureServer",
+    "via": "search:Enriched_Parcels_Gilroy_jb (bulotti_CalPoly)"
+   },
+   {
+    "kind": "arcgis",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Parcels_Gilroy/FeatureServer",
+    "via": "search:Parcels Gilroy (ahajraso_CalPoly)"
+   },
+   {
+    "kind": "arcgis",
+    "url": "https://services8.arcgis.com/n7NW5ijV4dJUmrID/arcgis/rest/services/Parcels_view/FeatureServer",
+    "via": "search:Parcels view (justin.murtiff@cityofgilroy.org)"
+   },
+   {
+    "kind": "arcgis",
+    "url": "https://services3.arcgis.com/i2dkYWmb4wHvYPda/arcgis/rest/services/HESS_parcels_newark_gilroy_subset_v2/FeatureServer",
+    "via": "search:HESS parcels newark gilroy subset v2 (aolsen@bayareametro.gov_MTC)"
+   },
+   {
+    "kind": "arcgis",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Downtown_Parcels/FeatureServer",
+    "via": "search:Downtown_Parcels (alope395_CalPoly)"
+   },
+   {
+    "kind": "socrata",
+    "domain": "data.sccgov.org",
+    "id": "ubcd-cewv",
+    "via": "socrata:Parcels"
+   },
+   {
+    "kind": "socrata",
+    "domain": "data.sccgov.org",
+    "id": "3kk9-72xa",
+    "via": "socrata:Parcels"
+   },
+   {
+    "kind": "socrata",
+    "domain": "data.sccgov.org",
+    "id": "7xhz-2wj2",
+    "via": "socrata:Santa Clara County Interactive Map Viewer"
+   },
+   {
+    "kind": "socrata",
+    "domain": "data.sccgov.org",
+    "id": "ndvh-brsx",
+    "via": "socrata:Schools Areas"
+   },
+   {
+    "kind": "socrata",
+    "domain": "data.sccgov.org",
+    "id": "m7w6-h9s7",
+    "via": "socrata:Air Polygon"
+   },
+   {
+    "kind": "socrata",
+    "domain": "data.sccgov.org",
+    "id": "7asv-r4p3",
+    "via": "socrata:Schools Areas"
+   },
+   {
+    "kind": "socrata",
+    "domain": "data.sccgov.org",
+    "id": "neqe-k72i",
+    "via": "socrata:Land Polygon"
+   },
+   {
+    "kind": "socrata",
+    "domain": "data.sccgov.org",
+    "id": "kzek-6axk",
+    "via": "socrata:Air Polygon"
+   },
+   {
+    "kind": "socrata",
+    "domain": "data.sccgov.org",
+    "id": "aesq-kn4m",
+    "via": "socrata:Land Polygon"
+   }
+  ],
+  "log": [
+   {
+    "feed": "https://gisdata-sccplanning.hub.arcgis.com/api/feed/dcat-us/1.1.json",
+    "title": "Williamson Act Parcels With Active Contracts in Santa Clara County",
+    "urls": [
+     "https://gisdata-sccplanning.hub.arcgis.com/datasets/sccplanning::williamson-act-parcels-with-active-contracts-in-santa-clara-county",
+     "https://gisdata-sccplanning.hub.arcgis.com/datasets/sccplanning::williamson-act-parcels-with-active-contracts-in-santa-clara-county",
+     "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Ongoing_Contract)/FeatureServer/0",
+     "https://gisdata-sccplanning.hub.arcgis.com/api/download/v1/items/5bf6bed923ef4b1e831925cdec5fca11/csv?layers=0",
+     "https://gisdata-sccplanning.hub.arcgis.com/api/download/v1/items/5bf6bed923ef4b1e831925cdec5fca11/shapefile?layers=0",
+     "https://gisdata-sccplanning.hub.arcgis.com/api/download/v1/items/5bf6bed923ef4b1e831925cdec5fca11/geojson?layers=0"
+    ]
+   },
+   {
+    "feed": "https://gisdata-sccplanning.hub.arcgis.com/api/feed/dcat-us/1.1.json",
+    "title": "Williamson Act Non-Renewed Parcels in Santa Clara County",
+    "urls": [
+     "https://gisdata-sccplanning.hub.arcgis.com/datasets/sccplanning::williamson-act-non-renewed-parcels-in-santa-clara-county",
+     "https://gisdata-sccplanning.hub.arcgis.com/datasets/sccplanning::williamson-act-non-renewed-parcels-in-santa-clara-county",
+     "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Non_Renewed)/FeatureServer/0",
+     "https://gisdata-sccplanning.hub.arcgis.com/api/download/v1/items/95e1055355964fd0949563f377127231/csv?layers=0",
+     "https://gisdata-sccplanning.hub.arcgis.com/api/download/v1/items/95e1055355964fd0949563f377127231/shapefile?layers=0",
+     "https://gisdata-sccplanning.hub.arcgis.com/api/download/v1/items/95e1055355964fd0949563f377127231/geojson?layers=0"
+    ]
+   },
+   {
+    "feed": "https://gisdata-sccplanning.hub.arcgis.com/api/feed/dcat-us/1.1.json",
+    "title": "Santa Clara County Open Space Easement Parcels",
+    "urls": [
+     "https://gisdata-sccplanning.hub.arcgis.com/datasets/sccplanning::santa-clara-county-open-space-easement-parcels",
+     "https://gisdata-sccplanning.hub.arcgis.com/datasets/sccplanning::santa-clara-county-open-space-easement-parcels",
+     "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Open_Space_Easement_Parcels/FeatureServer/0",
+     "https://gisdata-sccplanning.hub.arcgis.com/api/download/v1/items/1b1609fffa7048b0999ea4e96937b181/csv?layers=0",
+     "https://gisdata-sccplanning.hub.arcgis.com/api/download/v1/items/1b1609fffa7048b0999ea4e96937b181/shapefile?layers=0",
+     "https://gisdata-sccplanning.hub.arcgis.com/api/download/v1/items/1b1609fffa7048b0999ea4e96937b181/geojson?layers=0"
+    ]
+   },
+   {
+    "feed": "https://data.sccgov.org/data.json",
+    "title": "Parcels",
+    "urls": [
+     "https://data.sccgov.org/d/ubcd-cewv",
+     "https://data.sccgov.org/api/v3/views/ubcd-cewv/export.csv?accessType=DOWNLOAD",
+     "https://data.sccgov.org/api/v3/views/ubcd-cewv/query.json?accessType=DOWNLOAD",
+     "https://data.sccgov.org/api/v3/views/ubcd-cewv/query.xml?accessType=DOWNLOAD",
+     "https://data.sccgov.org/api/v3/views/ubcd-cewv/query.geojson?accessType=DOWNLOAD",
+     "https://data.sccgov.org/api/v3/views/ubcd-cewv/export.kml?accessType=DOWNLOAD"
+    ]
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Santa Clara County Open Space Easement Parcels",
+    "owner": "SCC.Planning.Office",
+    "type": "Feature Service",
+    "url": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Open_Space_Easement_Parcels/FeatureServer"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Williamson Act Parcels With Active Contracts in Santa Clara County",
+    "owner": "SCC.Planning.Office",
+    "type": "Feature Service",
+    "url": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Ongoing_Contract)/FeatureServer"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Williamson Act Non-Renewed Parcels in Santa Clara County",
+    "owner": "SCC.Planning.Office",
+    "type": "Feature Service",
+    "url": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Non_Renewed)/FeatureServer"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Santa Clara County Impervious Surfaces (Layer Package)",
+    "owner": "gpublisher_MROSD",
+    "type": "Layer Package",
+    "url": ""
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Santa Clara County General Plan Land Use Designations",
+    "owner": "SCC.Planning.Office",
+    "type": "Feature Service",
+    "url": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/PlanningOfficeDataService2/FeatureServer/0"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Planning Office Data Service2",
+    "owner": "SCC.Planning.Office",
+    "type": "Feature Service",
+    "url": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/PlanningOfficeDataService2/FeatureServer"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "San Mateo and Santa Clara County MHPs and Surrounding Communities",
+    "owner": "007626580_SJSUGIS",
+    "type": "Web Map",
+    "url": ""
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Santa Clara County Impervious Surfaces (Vector Tile Layer)",
+    "owner": "gpublisher_MROSD",
+    "type": "Vector Tile Service",
+    "url": "https://vectortileservices2.arcgis.com/qmhndvC947rDNl6t/arcgis/rest/services/Santa_Clara_County_Impervious_Surfaces/VectorTileServer"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Areas Potentially Subject to SB 9 in Unincorporated Santa Clara County",
+    "owner": "Steve.Borgstrom",
+    "type": "Feature Service",
+    "url": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Areas_Potentially_Subject_to_SB_9_in_Unincorporated_Santa_Clara_County/FeatureServer"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Santa Clara County Impervious Surfaces (FileGDB)",
+    "owner": "gpublisher_MROSD",
+    "type": "File Geodatabase",
+    "url": null
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "SCCProperty",
+    "owner": "SantaClaraCoGIS",
+    "type": "Map Service",
+    "url": "https://mapservices.sccgov.org/arcgis/rest/services/property/SCCProperty/MapServer"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Santa Clara County Hemp Cultivation Eligibility",
+    "owner": "Steve.Borgstrom",
+    "type": "Web Map",
+    "url": null
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Ward Boundary",
+    "owner": "GIS_MROSD",
+    "type": "Feature Service",
+    "url": "https://services2.arcgis.com/qmhndvC947rDNl6t/arcgis/rest/services/Ward_Boundary_(public)/FeatureServer"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "7-County Bay Area Impervious Surfaces Legend",
+    "owner": "gpublisher_MROSD",
+    "type": "Feature Service",
+    "url": "https://services2.arcgis.com/qmhndvC947rDNl6t/arcgis/rest/services/Unified_Impervious_Surfaces_Legend/FeatureServer"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Schools",
+    "owner": "Sampa.Patra@isd.sccgov.org_sccgov",
+    "type": "Feature Service",
+    "url": "https://services.arcgis.com/NkcnS0qk4w2wasOJ/arcgis/rest/services/SCCSchools/FeatureServer"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Parcels R&A",
+    "owner": "Sampa.Patra@isd.sccgov.org_sccgov",
+    "type": "Feature Service",
+    "url": "https://services.arcgis.com/NkcnS0qk4w2wasOJ/arcgis/rest/services/RAPParcels_DEDUP20130607_F/FeatureServer"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Unincorporated Areas Potentially Subject to SB 9 in Santa Clara County",
+    "owner": "Steve.Borgstrom",
+    "type": "Web Mapping Application",
+    "url": "https://sccplanning.maps.arcgis.com/apps/webappviewer/index.html?id=9a817fb94c0641969a41704a93e1a749"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "i15_LandUse_SantaClara2014",
+    "owner": "gis_data_admin@DWR",
+    "type": "Map Service",
+    "url": "https://utility.arcgis.com/usrsvcs/servers/f8bda7fb5e454382ad7297b0281caae3/rest/services/Planning/i15_LandUse_SantaClara2014/MapServer"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Potential_SB9_Parcels_2020",
+    "owner": "Steve.Borgstrom",
+    "type": "Feature Service",
+    "url": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Potential_SB9_Parcels_2020/FeatureServer"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Parcel Map Index",
+    "owner": "CupertinoGIS",
+    "type": "Feature Service",
+    "url": "https://gis.cupertino.org/cupgis/rest/services/Public/Recorded_Map/MapServer/18"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "1. Interactive Property Assessment",
+    "owner": "SCC.Planning.Office",
+    "type": "Web Experience",
+    "url": "https://experience.arcgis.com/experience/a26ac88b18d7465baf1be31302706f1d"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Parcels Parks PRD_AC",
+    "owner": "Sampa.Patra@isd.sccgov.org_sccgov",
+    "type": "Feature Service",
+    "url": "https://services.arcgis.com/NkcnS0qk4w2wasOJ/arcgis/rest/services/SCCPRDParks_revd20130607_AC/FeatureServer"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Santa Clara County Historic Map",
+    "owner": "MatthewS_MUP",
+    "type": "Web Mapping Application",
+    "url": "https://sjsu-mupers.maps.arcgis.com/apps/View/index.html?appid=d7b5d0a51eb24499bbafad9a2bed947e"
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Santa Clara County Board of Education Trustee Areas (2022) with SCC Schools",
+    "owner": "SCCOE_Research_Evaluation",
+    "type": "Web Map",
+    "url": ""
+   },
+   {
+    "search": "Santa Clara County parcels",
+    "title": "Areas Potentially Subject to SB 9 in Unincorporated Santa Clara County",
+    "owner": "Steve.Borgstrom",
+    "type": "Web Mapping Application",
+    "url": "https://sccplanning.maps.arcgis.com/apps/webappviewer/index.html?id=2b337d703dcc4943bf9e01fd496f037c"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Parcels123",
+    "owner": "alope395_CalPoly",
+    "type": "Feature Service",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Parcels123/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Enriched_Parcels_Gilroy_jb",
+    "owner": "bulotti_CalPoly",
+    "type": "Feature Service",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Enriched_Parcels_Gilroy_jb/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Parcels Gilroy",
+    "owner": "ahajraso_CalPoly",
+    "type": "Feature Service",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Parcels_Gilroy/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Parcels view",
+    "owner": "justin.murtiff@cityofgilroy.org",
+    "type": "Feature Service",
+    "url": "https://services8.arcgis.com/n7NW5ijV4dJUmrID/arcgis/rest/services/Parcels_view/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "HSR NorCal Layers",
+    "owner": "GeoPlatform_CHSRA",
+    "type": "Feature Service",
+    "url": "https://services3.arcgis.com/rGGp0aiv6Rf11t2H/arcgis/rest/services/NORCAL_LAYERS/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Property_Crime_Aggregate",
+    "owner": "dlfahert_CalPoly",
+    "type": "Feature Service",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Property_Crime_Aggregate/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Parcels Gilroy",
+    "owner": "DeannaGibson_2",
+    "type": "Feature Service",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Parcels_Gilroy/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "LotlineAnno",
+    "owner": "justin.murtiff@cityofgilroy.org",
+    "type": "Vector Tile Service",
+    "url": "https://tiles.arcgis.com/tiles/n7NW5ijV4dJUmrID/arcgis/rest/services/LotlineAnno/VectorTileServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Permit_Activity",
+    "owner": "castanonk",
+    "type": "Feature Service",
+    "url": "https://services8.arcgis.com/n7NW5ijV4dJUmrID/arcgis/rest/services/Permit_Activity/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "HESS parcels newark gilroy subset v2",
+    "owner": "aolsen@bayareametro.gov_MTC",
+    "type": "Feature Service",
+    "url": "https://services3.arcgis.com/i2dkYWmb4wHvYPda/arcgis/rest/services/HESS_parcels_newark_gilroy_subset_v2/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Downtown_Parcels",
+    "owner": "alope395_CalPoly",
+    "type": "Feature Service",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Downtown_Parcels/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "New_Locations_C",
+    "owner": "acazar03_CalPoly",
+    "type": "Feature Service",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/New_Locations_C/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Second Chance Online City Limits",
+    "owner": "jwelker_MorganHill",
+    "type": "Feature Service",
+    "url": "https://services2.arcgis.com/7nQNsNGiGXOeUAiQ/arcgis/rest/services/Second_Chance_Online_City_Limits/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "South County City Boundaries_WFL1",
+    "owner": "esrimorganhill",
+    "type": "Feature Service",
+    "url": "https://services2.arcgis.com/7nQNsNGiGXOeUAiQ/arcgis/rest/services/South_County_City_Boundaries_WFL1/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Developments_v3",
+    "owner": "nanif_Stanford",
+    "type": "Feature Service",
+    "url": "https://services.arcgis.com/7CRlmWNEbeCqEJ6a/arcgis/rest/services/Developments_v3/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "GilroyNetworkTest Public View",
+    "owner": "twinnard_CalPoly",
+    "type": "Feature Service",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/daeb855540294ea394ab56df682afb43_public_view_1621288796690/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Gilroy Zoning Interactive map Public View",
+    "owner": "csoren02_CalPoly",
+    "type": "Feature Service",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/1780d2d3a94e4845816104ff3a3fae2f_public_view_1621017205068/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Gilroy California Public View",
+    "owner": "osalter_CalPoly",
+    "type": "Feature Service",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/cce0db07fe7146c08ac435bed0b7233a_public_view_1614365361328/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Gilroy_SecnarioA_ Public View",
+    "owner": "ahajraso_CalPoly",
+    "type": "Feature Service",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/3e87f28cfa754b778ee6e28848e06b6f_public_view_1619927046562/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Gilroy Public Public View",
+    "owner": "alope395_CalPoly",
+    "type": "Feature Service",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/6210ccb9f6024f3fb2f1eec4b02cd1ee_public_view_1614194249769/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Gilroy Public View",
+    "owner": "dajaeger_CalPoly",
+    "type": "Feature Service",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/94b1d8be94e842eb91c41a9560eb1c43_public_view_1614189097500/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Gilroy Public View",
+    "owner": "rmhennes_CalPoly",
+    "type": "Feature Service",
+    "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/ff0dae514af44a45bb4679f42af72e9d_public_view_1614109120938/FeatureServer"
+   },
+   {
+    "search": "Gilroy parcels",
+    "title": "Planning Project Locations - Public View",
+    "owner": "castanonk",
+    "type": "Feature Service",
+    "url": "https://services8.arcgis.com/n7NW5ijV4dJUmrID/arcgis/rest/services/Planning_Project_Locations_-_Public_View/FeatureServer"
+   },
+   {
+    "socrata": "data.sccgov.org",
+    "name": "Parcels",
+    "id": "ubcd-cewv",
+    "type": "dataset",
+    "lens": "tabular"
+   },
+   {
+    "socrata": "data.sccgov.org",
+    "name": "Parcels",
+    "id": "3kk9-72xa",
+    "type": "map",
+    "lens": "tabular"
+   },
+   {
+    "socrata": "data.sccgov.org",
+    "name": "Santa Clara County Interactive Map Viewer",
+    "id": "7xhz-2wj2",
+    "type": "href",
+    "lens": "href"
+   },
+   {
+    "socrata": "data.sccgov.org",
+    "name": "Schools Areas",
+    "id": "ndvh-brsx",
+    "type": "dataset",
+    "lens": "tabular"
+   },
+   {
+    "socrata": "data.sccgov.org",
+    "name": "Air Polygon",
+    "id": "m7w6-h9s7",
+    "type": "dataset",
+    "lens": "tabular"
+   },
+   {
+    "socrata": "data.sccgov.org",
+    "name": "Schools Areas",
+    "id": "7asv-r4p3",
+    "type": "map",
+    "lens": "tabular"
+   },
+   {
+    "socrata": "data.sccgov.org",
+    "name": "Land Polygon",
+    "id": "neqe-k72i",
+    "type": "dataset",
+    "lens": "tabular"
+   },
+   {
+    "socrata": "data.sccgov.org",
+    "name": "Air Polygon",
+    "id": "kzek-6axk",
+    "type": "map",
+    "lens": "tabular"
+   },
+   {
+    "socrata": "data.sccgov.org",
+    "name": "Land Polygon",
+    "id": "aesq-kn4m",
+    "type": "map",
+    "lens": "tabular"
+   }
+  ],
+  "attempts": [
+   {
+    "layer": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Ongoing_Contract)/FeatureServer/0",
+    "error": "Error: only 26 features in the Oldtown box"
+   },
+   {
+    "layer": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Non_Renewed)/FeatureServer/0",
+    "error": "Error: only 0 features in the Oldtown box"
+   },
+   {
+    "layer": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Open_Space_Easement_Parcels/FeatureServer/0",
+    "error": "Error: only 0 features in the Oldtown box"
+   },
+   {
+    "layer": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Open_Space_Easement_Parcels/FeatureServer/0",
+    "error": "Error: only 0 features in the Oldtown box"
+   },
+   {
+    "layer": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Ongoing_Contract)/FeatureServer/0",
+    "error": "Error: only 26 features in the Oldtown box"
+   },
+   {
+    "layer": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Non_Renewed)/FeatureServer/0",
+    "error": "Error: only 0 features in the Oldtown box"
+   },
+   {
+    "layer": "https://services.arcgis.com/NkcnS0qk4w2wasOJ/arcgis/rest/services/RAPParcels_DEDUP20130607_F/FeatureServer/0",
+    "error": "Error: only 2 features in the Oldtown box"
+   },
+   {
+    "layer": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Potential_SB9_Parcels_2020/FeatureServer/1",
+    "error": "Error: only 1 features in the Oldtown box"
+   },
+   {
+    "layer": "https://gis.cupertino.org/cupgis/rest/services/Public/Recorded_Map/MapServer/18",
+    "error": "Error: only 0 features in the Oldtown box"
+   },
+   {
+    "layer": "https://services.arcgis.com/NkcnS0qk4w2wasOJ/arcgis/rest/services/SCCPRDParks_revd20130607_AC/FeatureServer/0",
+    "error": "Error: only 1 features in the Oldtown box"
+   },
+   {
+    "layer": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Parcels123/FeatureServer/0",
+    "ok": true,
+    "n": 146
+   }
+  ]
+ },
+ "parcel_layer": {
+  "source": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Parcels123/FeatureServer/0",
+  "name": "Parcels123",
+  "fields_used": {
+   "apn": "ParcelNumber",
+   "use": null,
+   "use_desc": null,
+   "units": null,
+   "year": null,
+   "address": null,
+   "zoning": null
+  },
+  "value_fields": [],
+  "inventory": [
+   {
+    "name": "OBJECTID",
+    "filled": 146,
+    "distinct": 146,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ]
+   },
+   {
+    "name": "GlobalID",
+    "filled": 146,
+    "distinct": 146,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "1e6fc6c1-5ba1-4378-825a-77d8e3a85fd4",
+     "9ecb73b6-4867-4ae3-95b7-24e57df98507",
+     "178e078e-12fe-49a4-9ca4-6915e5108383",
+     "92c0ed42-cdf4-4902-828e-fb7e7fe2ab88",
+     "bd3b5f72-c0e7-4bed-9109-73e117031c3d"
+    ]
+   },
+   {
+    "name": "SiteNumber",
+    "filled": 0,
+    "distinct": 0,
+    "sensitive": false,
+    "value_like": false,
+    "examples": []
+   },
+   {
+    "name": "ParcelNumber",
+    "filled": 0,
+    "distinct": 0,
+    "sensitive": false,
+    "value_like": false,
+    "examples": []
+   }
+  ],
+  "use_codes": []
+ }
+}
