@@ -1,0 +1,16 @@
+{
+  "name": "ogna-map",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Oldtown Gilroy Neighborhood Alliance organizing map: lots, census blocks, a district and overlapping neighborhoods. Static site, no build step; scripts/ builds the data files.",
+  "type": "module",
+  "scripts": {
+    "serve": "python3 -m http.server 8000",
+    "build:data": "node scripts/build_gilroy.mjs",
+    "test": "node --test test/"
+  },
+  "devDependencies": {
+    "@turf/turf": "^7.4.0",
+    "mapshaper": "^0.7.66"
+  }
+}

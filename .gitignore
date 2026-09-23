@@ -1,0 +1,9 @@
+node_modules/
+data/raw/
+# Private data: tax roll / assessor exports never enter the repo. Load them in the app instead.
+private/
+*.csv
+*.xlsx
+*.xls
+*:Zone.Identifier
+.DS_Store

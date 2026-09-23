@@ -1,0 +1,55 @@
+# Builds the public data files (census blocks, parcels, city limits) on a GitHub runner, which has
+# open internet, and commits them back to the branch that triggered the run.
+name: Build data
+
+on:
+  push:
+    paths:
+      - scripts/build_gilroy.mjs
+      - scripts/sources.json
+      - .github/workflows/build-data.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-data-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Cache raw downloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            data/raw/*.zip
+          key: census-raw-2020-v1
+      - name: Build data
+        env:
+          NODE_OPTIONS: --max-old-space-size=12288
+        run: node scripts/build_gilroy.mjs
+      - name: Commit built data
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/city_limits.json data/blocks.json data/parcels.json data/sources/ 2>/dev/null || true
+          if git diff --cached --quiet; then echo "no data changes"; exit 0; fi
+          git commit -m "Build data files (run ${{ github.run_number }})"
+          for i in 1 2 3; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            sleep 5
+          done
+          exit 1
