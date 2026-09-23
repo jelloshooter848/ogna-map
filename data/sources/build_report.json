@@ -1,9 +1,9 @@
 {
- "built_at": "2026-09-23T01:03:26.354Z",
+ "built_at": "2026-09-23T01:05:26.698Z",
  "stages": {
   "city_limits": {
    "ok": true,
-   "seconds": 1.089,
+   "seconds": 0.475,
    "geoid": "0629504",
    "bbox": [
     -121.64352,
@@ -14,19 +14,19 @@
   },
   "blocks": {
    "ok": true,
-   "seconds": 17.492,
+   "seconds": 14.708,
    "blocks": 638,
    "city_blocks": 627,
    "city_pop": 59520
   },
   "housing_detail": {
    "ok": false,
-   "seconds": 0.439,
-   "error": "Error: https://api.census.gov/data/2020/dec/dhc?get=H3_001N,H3_002N,H4_001N,H4_004N&for=block:*&in=state:06&in=county:085&in=tract:512602: not JSON: <html style=\"font-size: 14px;\">\n\n<head>\n    <title>Missing Key</title>\n    <link rel=\"icon\" type=\"image/x-icon\" href=\"favicon.ico\">\n    <link rel=\"stylesheet\" type=\"text/css\" href=\"assets/styles.css\">\n    at getJson (file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:70:50)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async censusBlocks (file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:173:35)\n    at async addHousingDetail (file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:182:15)\n    at async stage (file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:81:20)\n    at async file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:417:1"
+   "seconds": 0.195,
+   "error": "Error: https://api.census.gov/data/2020/dec/dhc?get=H3_001N,H3_002N,H4_001N,H4_004N&for=block:*&in=state:06&in=county:085&in=tract:512602: not JSON: <html style=\"font-size: 14px;\">\n\n<head>\n    <title>Missing Key</title>\n    <link rel=\"icon\" type=\"image/x-icon\" href=\"favicon.ico\">\n    <link rel=\"stylesheet\" type=\"text/css\" href=\"assets/styles.css\">\n    at getJson (file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:72:50)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async censusBlocks (file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:175:35)\n    at async addHousingDetail (file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:184:15)\n    at async stage (file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:83:20)\n    at async file:///home/runner/work/ogna-map/ogna-map/scripts/build_gilroy.mjs:429:1"
   },
   "boundary_streets": {
    "ok": true,
-   "seconds": 8.108,
+   "seconds": 16.883,
    "ways": 240,
    "by_name": {
     "Monterey Road": 50,
@@ -43,11 +43,14 @@
   },
   "parcels": {
    "ok": true,
-   "seconds": 8.756,
-   "source": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Parcels123/FeatureServer/0",
-   "parcels": 0,
-   "without_block": 0,
-   "value_fields": []
+   "seconds": 14.41,
+   "source": "https://services8.arcgis.com/n7NW5ijV4dJUmrID/arcgis/rest/services/Parcels_view/FeatureServer/0",
+   "parcels": 12309,
+   "without_block": 30,
+   "value_fields": [
+    "TAX_RATE_AREA",
+    "MillsActPctPropertyTaxReduction"
+   ]
   }
  },
  "checks": {
@@ -57,6 +60,16 @@
  },
  "parcel_discovery": {
   "candidates": [
+   {
+    "kind": "arcgis",
+    "url": "https://services8.arcgis.com/n7NW5ijV4dJUmrID/arcgis/rest/services/Parcels_view/FeatureServer",
+    "via": "config"
+   },
+   {
+    "kind": "arcgis",
+    "url": "https://mapservices.sccgov.org/arcgis/rest/services/property/SCCProperty/MapServer",
+    "via": "config"
+   },
    {
     "kind": "arcgis",
     "url": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Ongoing_Contract)/FeatureServer/0",
@@ -121,11 +134,6 @@
     "kind": "arcgis",
     "url": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Parcels_Gilroy/FeatureServer",
     "via": "search:Parcels Gilroy (ahajraso_CalPoly)"
-   },
-   {
-    "kind": "arcgis",
-    "url": "https://services8.arcgis.com/n7NW5ijV4dJUmrID/arcgis/rest/services/Parcels_view/FeatureServer",
-    "via": "search:Parcels view (justin.murtiff@cityofgilroy.org)"
    },
    {
     "kind": "arcgis",
@@ -643,96 +651,877 @@
   ],
   "attempts": [
    {
-    "layer": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Ongoing_Contract)/FeatureServer/0",
-    "error": "Error: only 26 features in the Oldtown box"
-   },
-   {
-    "layer": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Non_Renewed)/FeatureServer/0",
-    "error": "Error: only 0 features in the Oldtown box"
-   },
-   {
-    "layer": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Open_Space_Easement_Parcels/FeatureServer/0",
-    "error": "Error: only 0 features in the Oldtown box"
-   },
-   {
-    "layer": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Open_Space_Easement_Parcels/FeatureServer/0",
-    "error": "Error: only 0 features in the Oldtown box"
-   },
-   {
-    "layer": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Ongoing_Contract)/FeatureServer/0",
-    "error": "Error: only 26 features in the Oldtown box"
-   },
-   {
-    "layer": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Williamson_Act_Parcels_(Non_Renewed)/FeatureServer/0",
-    "error": "Error: only 0 features in the Oldtown box"
-   },
-   {
-    "layer": "https://services.arcgis.com/NkcnS0qk4w2wasOJ/arcgis/rest/services/RAPParcels_DEDUP20130607_F/FeatureServer/0",
-    "error": "Error: only 2 features in the Oldtown box"
-   },
-   {
-    "layer": "https://services2.arcgis.com/tcv2cMrq63AgvbHF/arcgis/rest/services/Potential_SB9_Parcels_2020/FeatureServer/1",
-    "error": "Error: only 1 features in the Oldtown box"
-   },
-   {
-    "layer": "https://gis.cupertino.org/cupgis/rest/services/Public/Recorded_Map/MapServer/18",
-    "error": "Error: only 0 features in the Oldtown box"
-   },
-   {
-    "layer": "https://services.arcgis.com/NkcnS0qk4w2wasOJ/arcgis/rest/services/SCCPRDParks_revd20130607_AC/FeatureServer/0",
-    "error": "Error: only 1 features in the Oldtown box"
-   },
-   {
-    "layer": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Parcels123/FeatureServer/0",
+    "layer": "https://services8.arcgis.com/n7NW5ijV4dJUmrID/arcgis/rest/services/Parcels_view/FeatureServer/0",
     "ok": true,
-    "n": 146
+    "n": 12312
    }
   ]
  },
  "parcel_layer": {
-  "source": "https://services1.arcgis.com/0j6vZbECadDEXdAS/arcgis/rest/services/Parcels123/FeatureServer/0",
-  "name": "Parcels123",
+  "source": "https://services8.arcgis.com/n7NW5ijV4dJUmrID/arcgis/rest/services/Parcels_view/FeatureServer/0",
+  "name": "Parcels",
   "fields_used": {
-   "apn": "ParcelNumber",
-   "use": null,
-   "use_desc": null,
+   "apn": "APN",
+   "use": "USE_CODE",
+   "use_desc": "LandUsedescription",
    "units": null,
-   "year": null,
-   "address": null,
-   "zoning": null
+   "year": "YEAR_BUILT",
+   "address": "SITUS_ADDRESS",
+   "zoning": "ZoneCode"
   },
-  "value_fields": [],
+  "value_fields": [
+   "TAX_RATE_AREA",
+   "MillsActPctPropertyTaxReduction"
+  ],
   "inventory": [
    {
     "name": "OBJECTID",
-    "filled": 146,
-    "distinct": 146,
+    "filled": 12312,
+    "distinct": 12312,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "145880",
+     "145881",
+     "145882",
+     "145884",
+     "145886"
+    ]
+   },
+   {
+    "name": "ParcelID",
+    "filled": 12312,
+    "distinct": 12312,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "4422",
+     "5810",
+     "5236",
+     "6159",
+     "5941"
+    ]
+   },
+   {
+    "name": "APN",
+    "filled": 12312,
+    "distinct": 12309,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "78323006",
+     "78301013",
+     "78328030",
+     "78333031",
+     "78301023"
+    ]
+   },
+   {
+    "name": "APN12",
+    "filled": 12312,
+    "distinct": 12309,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "783 23 006",
+     "783 01 013",
+     "783 28 030",
+     "783 33 031",
+     "783 01 023"
+    ]
+   },
+   {
+    "name": "BookPage",
+    "filled": 12239,
+    "distinct": 281,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "783 23",
+     "783 01",
+     "783 28",
+     "783 33",
+     "783 35"
+    ]
+   },
+   {
+    "name": "ParcelType",
+    "filled": 12312,
+    "distinct": 6,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "Parcel",
+     "Common Area",
+     "Road Easement",
+     "Flood Control",
+     "Open Space"
+    ]
+   },
+   {
+    "name": "Floor",
+    "filled": 11973,
+    "distinct": 3,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "1",
+     "2",
+     "3"
+    ]
+   },
+   {
+    "name": "TractNumber",
+    "filled": 11154,
+    "distinct": 255,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "4849",
+     "4667",
+     "6252",
+     "7430",
+     "7637"
+    ]
+   },
+   {
+    "name": "ParcelLotNumber",
+    "filled": 3738,
+    "distinct": 368,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "156",
+     "H-3",
+     "2",
+     "26",
+     "35"
+    ]
+   },
+   {
+    "name": "OldAPNs",
+    "filled": 12025,
+    "distinct": 9658,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "783 23 006",
+     "783 01 013",
+     "783 28 030",
+     "783 33 031",
+     "783 01 023"
+    ]
+   },
+   {
+    "name": "SourceDocumentType",
+    "filled": 12220,
+    "distinct": 6,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "Tract Map",
+     "Assessor Map",
+     "Parcel Map",
+     "LLA",
+     "ROS"
+    ]
+   },
+   {
+    "name": "SourceDocumentNumber",
+    "filled": 9730,
+    "distinct": 263,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "4849",
+     "4667",
+     "6252",
+     "7430",
+     "7637"
+    ]
+   },
+   {
+    "name": "AdditionalNotes",
+    "filled": 591,
+    "distinct": 48,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "COMMON AREA",
+     "FOR PARK PURPOSES",
+     "NO SITE ADDRESS",
+     "PRIVATE STREET",
+     "PARK"
+    ]
+   },
+   {
+    "name": "TAX_RATE_AREA",
+    "filled": 11719,
+    "distinct": 4,
+    "sensitive": false,
+    "value_like": true,
+    "numeric_summary": {
+     "min": 2000,
+     "median": 2001,
+     "max": 2007
+    }
+   },
+   {
+    "name": "SITUS_ADDRESS",
+    "filled": 11522,
+    "distinct": 11407,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "1440 OUSLEY DR",
+     "1637 EL DORADO DR",
+     "8448 DELTA DR",
+     "1555 HECKER PASS HY #H102",
+     "1590 EL DORADO DR"
+    ]
+   },
+   {
+    "name": "SITUS_HOUSE_NBR",
+    "filled": 11378,
+    "distinct": 3447,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "1440",
+     "1637",
+     "8448",
+     "1555",
+     "1590"
+    ]
+   },
+   {
+    "name": "SITUS_HOUSE_SUFX",
+    "filled": 79,
+    "distinct": 12,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "A",
+     "B",
+     "C",
+     "6",
+     "D"
+    ]
+   },
+   {
+    "name": "SITESTREET",
+    "filled": 11522,
+    "distinct": 585,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "OUSLEY DR",
+     "EL DORADO DR",
+     "DELTA DR",
+     "HECKER PASS HY",
+     "TOYON CT"
+    ]
+   },
+   {
+    "name": "SITUS_STREET_DIR",
+    "filled": 342,
+    "distinct": 4,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "W",
+     "E",
+     "N",
+     " E"
+    ]
+   },
+   {
+    "name": "SITUS_STREET_NAM",
+    "filled": 11522,
+    "distinct": 516,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "OUSLEY",
+     "EL DORADO",
+     "DELTA",
+     "HECKER PASS",
+     "TOYON"
+    ]
+   },
+   {
+    "name": "SITUS_STREET_TYP",
+    "filled": 11434,
+    "distinct": 14,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "DR",
+     "HY",
+     "CT",
+     "LN",
+     "ST"
+    ]
+   },
+   {
+    "name": "SITUS_UNIT_NBR",
+    "filled": 430,
+    "distinct": 225,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "H102",
+     "A102",
+     "G201",
+     "E102",
+     "D101"
+    ]
+   },
+   {
+    "name": "SITUS_CITY_NAME",
+    "filled": 11522,
+    "distinct": 1,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "GILROY"
+    ]
+   },
+   {
+    "name": "SITUS_STATE_CODE",
+    "filled": 11522,
+    "distinct": 1,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "CA"
+    ]
+   },
+   {
+    "name": "SITUS_ZIP_CODE",
+    "filled": 11522,
+    "distinct": 1513,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "95020-3727",
+     "95020-3754",
+     "95020-3759",
+     "95020-3770",
+     "95020-3718"
+    ]
+   },
+   {
+    "name": "NBR_OF_SITUS_ADD",
+    "filled": 11719,
+    "distinct": 16,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "1",
+     "0",
+     "2",
+     "3",
+     "5"
+    ]
+   },
+   {
+    "name": "PARCEL_IN_ACRES",
+    "filled": 11719,
+    "distinct": 408,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "0.16",
+     "0.2",
+     "0.02",
+     "0.03",
+     "0.25"
+    ]
+   },
+   {
+    "name": "PARCEL_IN_SQ_FT",
+    "filled": 11719,
+    "distinct": 3748,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "7000",
+     "8910",
+     "936",
+     "1410",
+     "10925"
+    ]
+   },
+   {
+    "name": "YEAR_BUILT",
+    "filled": 11719,
+    "distinct": 134,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "1972",
+     "1973",
+     "1982",
+     "1984",
+     "1985"
+    ]
+   },
+   {
+    "name": "EFFECTIVE_YR_BLT",
+    "filled": 11719,
+    "distinct": 132,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "1972",
+     "1973",
+     "1982",
+     "1984",
+     "1985"
+    ]
+   },
+   {
+    "name": "TRACT",
+    "filled": 8905,
+    "distinct": 259,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "4849",
+     "4667",
+     "7136",
+     "7430",
+     "7637"
+    ]
+   },
+   {
+    "name": "LOT_NUMBER",
+    "filled": 9082,
+    "distinct": 484,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "156",
+     "13",
+     "23",
+     "J",
+     "4"
+    ]
+   },
+   {
+    "name": "BLOCK_NUMBER",
+    "filled": 157,
+    "distinct": 10,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "2",
+     "6",
+     "3",
+     "1",
+     "4"
+    ]
+   },
+   {
+    "name": "RECORDER_MAP_NBR",
+    "filled": 729,
+    "distinct": 217,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "550",
+     "613",
+     "474",
+     "575",
+     "385"
+    ]
+   },
+   {
+    "name": "RECORDER_PGE_NBR",
+    "filled": 755,
+    "distinct": 58,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "43",
+     "40",
+     "8",
+     "49",
+     "56"
+    ]
+   },
+   {
+    "name": "LTST_DOCUMENT_NU",
+    "filled": 11719,
+    "distinct": 11125,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "19067654",
+     "19038132",
+     "25467902",
+     "20810229",
+     "22274359"
+    ]
+   },
+   {
+    "name": "LTST_TRANSFER_DT",
+    "filled": 11719,
+    "distinct": 4980,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "20060821",
+     "20060728",
+     "20230205",
+     "20100810",
+     "20130621"
+    ]
+   },
+   {
+    "name": "NUMBER_OF_OWNERS",
+    "filled": 11719,
+    "distinct": 10,
+    "sensitive": true,
+    "value_like": false
+   },
+   {
+    "name": "AS_OF_DATE",
+    "filled": 11719,
+    "distinct": 1,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "20240527"
+    ]
+   },
+   {
+    "name": "USE_CODE",
+    "filled": 11666,
+    "distinct": 58,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "1",
+     "6",
+     "2",
+     "3",
+     "69"
+    ]
+   },
+   {
+    "name": "USE_CODE_EXTEN",
+    "filled": 1876,
+    "distinct": 19,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "C",
+     "S",
+     "O",
+     "E",
+     "D"
+    ]
+   },
+   {
+    "name": "POOL_CODE",
+    "filled": 10409,
+    "distinct": 5,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "N",
+     "P",
+     "B",
+     "S",
+     "Y"
+    ]
+   },
+   {
+    "name": "GARAGE_CODE",
+    "filled": 9937,
+    "distinct": 8,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "2",
+     "0",
+     "1",
+     "3",
+     "6"
+    ]
+   },
+   {
+    "name": "WELL_FLAG",
+    "filled": 144,
+    "distinct": 1,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "W"
+    ]
+   },
+   {
+    "name": "WILLIAMSON_ACT_F",
+    "filled": 2,
+    "distinct": 1,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "W"
+    ]
+   },
+   {
+    "name": "ELSCHDIST",
+    "filled": 11419,
+    "distinct": 1,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     " "
+    ]
+   },
+   {
+    "name": "HSCHDIST",
+    "filled": 11419,
+    "distinct": 1,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     " "
+    ]
+   },
+   {
+    "name": "UNSCHDIST",
+    "filled": 11425,
+    "distinct": 1,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "GILROY UNIFIED"
+    ]
+   },
+   {
+    "name": "PUBLIC_NONPUBLIC",
+    "filled": 11719,
+    "distinct": 4,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "N",
+     "P",
+     "S",
+     "L"
+    ]
+   },
+   {
+    "name": "BLDNGS_ON_PARCEL",
+    "filled": 11719,
+    "distinct": 5,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "1",
+     "2",
+     "0",
+     "3",
+     "4"
+    ]
+   },
+   {
+    "name": "NUMBER_OF_FLOORS",
+    "filled": 11568,
+    "distinct": 6,
     "sensitive": false,
     "value_like": false,
     "examples": [
      "1",
      "2",
      "3",
-     "4",
+     "0",
      "5"
     ]
    },
    {
-    "name": "GlobalID",
-    "filled": 146,
-    "distinct": 146,
+    "name": "NUMBER_OF_UNITS",
+    "filled": 1304,
+    "distinct": 66,
     "sensitive": false,
     "value_like": false,
     "examples": [
-     "1e6fc6c1-5ba1-4378-825a-77d8e3a85fd4",
-     "9ecb73b6-4867-4ae3-95b7-24e57df98507",
-     "178e078e-12fe-49a4-9ca4-6915e5108383",
-     "92c0ed42-cdf4-4902-828e-fb7e7fe2ab88",
-     "bd3b5f72-c0e7-4bed-9109-73e117031c3d"
+     "2",
+     "0",
+     "4",
+     "3",
+     "12"
     ]
    },
    {
-    "name": "SiteNumber",
+    "name": "TOTAL_SQ_FOOTAGE",
+    "filled": 11719,
+    "distinct": 2307,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "1252",
+     "2450",
+     "1244",
+     "1223",
+     "2377"
+    ]
+   },
+   {
+    "name": "PREVIOUS_APN",
+    "filled": 4895,
+    "distinct": 779,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "78320028",
+     "78301001",
+     "78302025",
+     "78340002",
+     "78335072"
+    ]
+   },
+   {
+    "name": "DTE_PREV_APN_CUR",
+    "filled": 4895,
+    "distinct": 396,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "19930823",
+     "20031114",
+     "20010328",
+     "19900905",
+     "20000111"
+    ]
+   },
+   {
+    "name": "PREV_KEY_CHANGE",
+    "filled": 4895,
+    "distinct": 4,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "S",
+     "C",
+     "B",
+     "M"
+    ]
+   },
+   {
+    "name": "ImportDate",
+    "filled": 11719,
+    "distinct": 1,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "1718992669000"
+    ]
+   },
+   {
+    "name": "IsGovernmentOwned",
+    "filled": 12312,
+    "distinct": 2,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "No",
+     "Yes"
+    ]
+   },
+   {
+    "name": "IsCornerLot",
+    "filled": 12312,
+    "distinct": 2,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "No",
+     "Yes"
+    ]
+   },
+   {
+    "name": "City",
+    "filled": 12204,
+    "distinct": 1,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "Gilroy"
+    ]
+   },
+   {
+    "name": "ZoneCode",
+    "filled": 12298,
+    "distinct": 26,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "R-1",
+     "R-3",
+     "RH",
+     "HPSD",
+     "PF"
+    ]
+   },
+   {
+    "name": "ZoneCode2",
+    "filled": 2076,
+    "distinct": 17,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "HPSD",
+     "RH",
+     "R-2",
+     "Gateway District",
+     "Transitional District"
+    ]
+   },
+   {
+    "name": "ZClass",
+    "filled": 12192,
+    "distinct": 20,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "Single Family Residential",
+     "Medium Density Residential",
+     "Residential Hillside",
+     "Hecker Pass Special Use Dist",
+     "Park/Public Facility"
+    ]
+   },
+   {
+    "name": "ZoningOrdinance",
+    "filled": 128,
+    "distinct": 1,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "<Null>"
+    ]
+   },
+   {
+    "name": "ZoningCodePage",
+    "filled": 12183,
+    "distinct": 49,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "Gilroy3005.html#30.5.10",
+     "Gilroy3007.html#30.7.10",
+     "Gilroy3009.html#30.9.10",
+     "Gilroy3029.html#30.29.10",
+     "Gilroy3025.html#30.25.10"
+    ]
+   },
+   {
+    "name": "ZoningOrdinanceDate",
     "filled": 0,
     "distinct": 0,
     "sensitive": false,
@@ -740,14 +1529,571 @@
     "examples": []
    },
    {
-    "name": "ParcelNumber",
+    "name": "HasPUD",
+    "filled": 12226,
+    "distinct": 2,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "No",
+     "Yes"
+    ]
+   },
+   {
+    "name": "PUDNumber",
+    "filled": 1087,
+    "distinct": 34,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "Z 91-10",
+     "Z 93-10",
+     "Z 10-05",
+     "Z 01-10",
+     "Z 09-04"
+    ]
+   },
+   {
+    "name": "LandUseCode",
+    "filled": 12300,
+    "distinct": 21,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "L",
+     "M",
+     "HILL",
+     "HP",
+     "P"
+    ]
+   },
+   {
+    "name": "LandUseCode2",
+    "filled": 899,
+    "distinct": 10,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "Hecker Pass Special Use District",
+     "Gateway District",
+     "R-3",
+     "Historic District",
+     "Expansion District"
+    ]
+   },
+   {
+    "name": "LandUsedescription",
+    "filled": 12300,
+    "distinct": 22,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "Low Density",
+     "Medium Density",
+     "Hillside",
+     "Hecker Pass Special Use District",
+     "Park Recreation Facility"
+    ]
+   },
+   {
+    "name": "LandUseResolution",
+    "filled": 128,
+    "distinct": 1,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "<Null>"
+    ]
+   },
+   {
+    "name": "LandUseResolutionDate",
     "filled": 0,
     "distinct": 0,
     "sensitive": false,
     "value_like": false,
     "examples": []
+   },
+   {
+    "name": "FEMAFloodZone",
+    "filled": 12300,
+    "distinct": 6,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "X",
+     "AH",
+     "AE",
+     "D",
+     "AO"
+    ]
+   },
+   {
+    "name": "FEMAPanel",
+    "filled": 12266,
+    "distinct": 37,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "0638",
+     "0636",
+     "0639",
+     "0637",
+     "639"
+    ]
+   },
+   {
+    "name": "IsWithinWildlandUrbanZone",
+    "filled": 12300,
+    "distinct": 2,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "name": "WildlandUIName",
+    "filled": 12299,
+    "distinct": 5,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "High",
+     "Urban Unzoned",
+     "Moderate",
+     "Non-Wildland/Non-Urban",
+     "Very High"
+    ]
+   },
+   {
+    "name": "StreetSweepingRoute",
+    "filled": 128,
+    "distinct": 1,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "<Null>"
+    ]
+   },
+   {
+    "name": "MillsActApplicationNumber",
+    "filled": 142,
+    "distinct": 15,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "MA 02-02 ",
+     "MA 06-03",
+     "MA 06-02",
+     "MA 02-01 ",
+     "MA 04-02"
+    ]
+   },
+   {
+    "name": "MillsActYearApproved",
+    "filled": 14,
+    "distinct": 6,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "2002",
+     "2006",
+     "2004",
+     "2008",
+     "2001"
+    ]
+   },
+   {
+    "name": "MillsActArchitecturalStyle",
+    "filled": 142,
+    "distinct": 8,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "Neo-classic",
+     "Craftsman Bungalow",
+     "Tudor Revival",
+     "Queen Anne",
+     "Eastlake Stick"
+    ]
+   },
+   {
+    "name": "MillsActPctPropertyTaxReduction",
+    "filled": 14,
+    "distinct": 11,
+    "sensitive": false,
+    "value_like": true,
+    "numeric_summary": {
+     "min": 0.28,
+     "median": 0.61,
+     "max": 0.72
+    }
+   },
+   {
+    "name": "GlobalID_1",
+    "filled": 12312,
+    "distinct": 12312,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "00bd692c-605b-4bb5-ba71-4019d9140538",
+     "00f58c46-bb23-45c4-840d-c7033318ac62",
+     "0105caa5-4b7d-421f-a728-01d93979fae2",
+     "02fbd16b-ea99-46c8-ba88-049c07a700b1",
+     "0509bd2e-4fea-424d-aa5a-9cda875b4880"
+    ]
+   },
+   {
+    "name": "Shape__Area",
+    "filled": 12312,
+    "distinct": 10964,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "1022.01171875",
+     "1313.26171875",
+     "135.96875",
+     "82.55859375",
+     "2570.62109375"
+    ]
+   },
+   {
+    "name": "Shape__Length",
+    "filled": 12312,
+    "distinct": 12276,
+    "sensitive": false,
+    "value_like": false,
+    "examples": [
+     "129.96401023982997",
+     "146.5397897234836",
+     "53.35110877835363",
+     "45.505452617651734",
+     "207.48249371481285"
+    ]
    }
   ],
-  "use_codes": []
+  "use_codes": [
+   [
+    "1 | Low Density",
+    6951
+   ],
+   [
+    "1 | Glen Loma Ranch",
+    798
+   ],
+   [
+    "6 | Medium Density",
+    521
+   ],
+   [
+    "1 | Medium Density",
+    366
+   ],
+   [
+    "1 | Hillside",
+    277
+   ],
+   [
+    " | Glen Loma Ranch",
+    224
+   ],
+   [
+    "1 | Neighborhood District",
+    213
+   ],
+   [
+    "1 | Downtown Specific Plan Area",
+    184
+   ],
+   [
+    "58 | Downtown Specific Plan Area",
+    143
+   ],
+   [
+    "1 | High Density",
+    140
+   ],
+   [
+    "4 | Medium Density",
+    128
+   ],
+   [
+    "6 | Glen Loma Ranch",
+    124
+   ],
+   [
+    "2 | Low Density",
+    116
+   ],
+   [
+    "6 | Downtown Specific Plan Area",
+    98
+   ],
+   [
+    "1 | Hecker Pass Special Use District",
+    93
+   ],
+   [
+    "1 | Neighborhood District (revised)",
+    86
+   ],
+   [
+    "3 | Medium Density",
+    81
+   ],
+   [
+    "2 | Medium Density",
+    80
+   ],
+   [
+    " | Medium Density",
+    77
+   ],
+   [
+    " | Low Density",
+    69
+   ],
+   [
+    "3 | Low Density",
+    64
+   ],
+   [
+    "58 | General Services Commercial",
+    60
+   ],
+   [
+    "6 | Low Density",
+    49
+   ],
+   [
+    "16 | General Industrial",
+    48
+   ],
+   [
+    " | Neighborhood District (revised)",
+    46
+   ],
+   [
+    "59 | Downtown Specific Plan Area",
+    46
+   ],
+   [
+    "69 | Downtown Specific Plan Area",
+    44
+   ],
+   [
+    " | Hillside",
+    38
+   ],
+   [
+    "69 | General Industrial",
+    38
+   ],
+   [
+    "4 | Low Density",
+    37
+   ],
+   [
+    "58 | Mixed Use Corridor High",
+    35
+   ],
+   [
+    "69 | Hillside",
+    34
+   ],
+   [
+    " | High Density",
+    32
+   ],
+   [
+    "16 | Industrial Park",
+    31
+   ],
+   [
+    " | Park Recreation Facility",
+    29
+   ],
+   [
+    "69 | Low Density",
+    27
+   ],
+   [
+    "58 | City Gateway District",
+    27
+   ],
+   [
+    "69 | Medium Density",
+    26
+   ],
+   [
+    "2 | Downtown Specific Plan Area",
+    26
+   ],
+   [
+    " | Downtown Specific Plan Area",
+    23
+   ],
+   [
+    "69 | Industrial Park",
+    23
+   ],
+   [
+    " | General Industrial",
+    23
+   ],
+   [
+    "4 | Downtown Specific Plan Area",
+    22
+   ],
+   [
+    "69 | General Services Commercial",
+    22
+   ],
+   [
+    "59 | Mixed Use Corridor High",
+    18
+   ],
+   [
+    " | Rural County",
+    18
+   ],
+   [
+    "40 | General Industrial",
+    18
+   ],
+   [
+    "59 | General Services Commercial",
+    17
+   ],
+   [
+    "16 | General Services Commercial",
+    15
+   ],
+   [
+    "52 | Mixed Use Corridor High",
+    14
+   ],
+   [
+    "1 | General Services Commercial",
+    13
+   ],
+   [
+    "52 | General Services Commercial",
+    13
+   ],
+   [
+    " | ",
+    12
+   ],
+   [
+    "76 | Low Density",
+    12
+   ],
+   [
+    " | Neighborhood District",
+    12
+   ],
+   [
+    "16 | Downtown Specific Plan Area",
+    12
+   ],
+   [
+    "43 |  ",
+    12
+   ],
+   [
+    "2 | High Density",
+    11
+   ],
+   [
+    "69 | Park Recreation Facility",
+    11
+   ],
+   [
+    "16 | City Gateway District",
+    11
+   ],
+   [
+    " | General Services Commercial",
+    11
+   ],
+   [
+    " | Public Quasi Public Facility",
+    10
+   ],
+   [
+    "95 | Park Recreation Facility",
+    10
+   ],
+   [
+    "69 | Glen Loma Ranch",
+    10
+   ],
+   [
+    " | Open Space",
+    9
+   ],
+   [
+    "1 | City Gateway District",
+    9
+   ],
+   [
+    "4 | High Density",
+    8
+   ],
+   [
+    "69 | High Density",
+    8
+   ],
+   [
+    "69 | Neighborhood District (revised)",
+    8
+   ],
+   [
+    "64 | Park Recreation Facility",
+    8
+   ],
+   [
+    " | Hecker Pass Special Use District",
+    8
+   ],
+   [
+    "95 | General Industrial",
+    8
+   ],
+   [
+    "74 | Downtown Specific Plan Area",
+    7
+   ],
+   [
+    "11 | General Industrial",
+    7
+   ],
+   [
+    "61 | General Services Commercial",
+    6
+   ],
+   [
+    "89 | Public Quasi Public Facility",
+    6
+   ],
+   [
+    "3 | Downtown Specific Plan Area",
+    6
+   ],
+   [
+    "4 | Glen Loma Ranch",
+    6
+   ],
+   [
+    "1 | Industrial Park",
+    6
+   ],
+   [
+    "54 | General Services Commercial",
+    6
+   ]
+  ]
  }
 }
