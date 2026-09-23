@@ -1,5 +1,7 @@
 # OGNA Neighborhood Map
 
+**Open the map: https://jelloshooter848.github.io/ogna-map/**
+
 An organizing map for the **Oldtown Gilroy Neighborhood Alliance**: the Oldtown district, the small
 neighborhood associations inside it (which may overlap), and who lives on each lot. The map is built from
 [densitymap](https://github.com/jelloshooter848/densitymap), but works with lots and census blocks instead
@@ -28,7 +30,9 @@ of census tracts. Background on OGNA is in [`docs/OGNA_CONTEXT.md`](docs/OGNA_CO
 
 ## Running it
 
-It's a static site with no build step. Browsers block `fetch()` from `file://`, so serve the folder:
+The live site is **https://jelloshooter848.github.io/ogna-map/**, served by GitHub Pages from this branch; every push updates it. Your neighborhood edits and any imported tax roll stay in your browser, not on the site.
+
+To run it locally instead: it's a static site with no build step, but browsers block `fetch()` from `file://`, so serve the folder:
 
 ```
 python3 -m http.server 8000      # or: npm run serve
