@@ -2,6 +2,8 @@
 
 **Open the map: https://oldtowngilroy.org/**
 
+Where things stand, decisions made so far, and the public-site plan: [`docs/SESSION_HANDOFF.md`](docs/SESSION_HANDOFF.md).
+
 An organizing map for the **Oldtown Gilroy Neighborhood Alliance**: the Oldtown district, the small
 neighborhood associations inside it (which may overlap), and who lives on each lot. The map is built from
 [densitymap](https://github.com/jelloshooter848/densitymap), but works with lots and census blocks instead
