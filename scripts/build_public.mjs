@@ -114,6 +114,23 @@ nwr["amenity"="school"](${b});nwr["amenity"="library"](${b});nwr["amenity"="comm
 nwr["highway"="bus_stop"](${b});nwr["railway"="station"](${b});nwr["public_transport"="station"](${b});
 );out center tags;`;
 
+/** The public Overpass servers are often busy (HTTP 429/504): try each a few times before giving up. */
+const OVERPASS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter", "https://overpass.kumi.systems/api/interpreter"];
+async function overpass(query) {
+  let last;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    for (const url of OVERPASS) {
+      try {
+        const r = await fetch(url, { method: "POST", body: new URLSearchParams({ data: query }), headers: { "user-agent": "ogna-map public build (github actions)" } });
+        if (r.ok) return await r.json();
+        last = new Error(`${new URL(url).host} HTTP ${r.status}`);
+      } catch (e) { last = e; }
+    }
+    await new Promise((res) => setTimeout(res, 15000 * (attempt + 1)));
+  }
+  throw last;
+}
+
 function osmCategory(t) {
   if (t.amenity === "library") return "library";
   if (t.amenity === "school") return "school";
@@ -129,14 +146,10 @@ async function buildOsm(regions) {
   const [w, s, e, n] = turf.bbox(district);
   const pad = 0.004;
   const bbox = [s - pad, w - pad, n + pad, e + pad].map((v) => v.toFixed(5)).join(",");
-  const r = await fetch("https://overpass-api.de/api/interpreter", {
-    method: "POST", body: new URLSearchParams({ data: OSM_QUERY(bbox) }),
-    headers: { "user-agent": "ogna-map public build (github actions)" },
-  });
-  if (!r.ok) throw new Error(`Overpass HTTP ${r.status}`);
+  const body = await overpass(OSM_QUERY(bbox));
   const seen = new Set();
   const places = [];
-  for (const el of (await r.json()).elements || []) {
+  for (const el of body.elements || []) {
     const t = el.tags || {}, cat = osmCategory(t);
     const lat = el.lat ?? el.center?.lat, lng = el.lon ?? el.center?.lon;
     if (!cat || lat == null) continue;
@@ -146,7 +159,8 @@ async function buildOsm(regions) {
     seen.add(key);
     places.push({ cat, name: t.name || "", ...(t["name:es"] ? { name_es: t["name:es"] } : {}), lat: +lat.toFixed(5), lng: +lng.toFixed(5), osm: `${el.type}/${el.id}` });
   }
-  return { source: "© OpenStreetMap contributors (ODbL)", built_at: new Date().toISOString(), places };
+  places.sort((a, b) => a.osm.localeCompare(b.osm));
+  return { source: "© OpenStreetMap contributors (ODbL)", places };
 }
 
 async function main() {
@@ -156,7 +170,6 @@ async function main() {
   await mkdir(OUT, { recursive: true });
 
   const regions = buildRegions(set, parcels);
-  regions.built_at = new Date().toISOString();
   await writeFile(path.join(OUT, "regions.geojson"), JSON.stringify(regions));
   const addresses = buildAddresses(parcels);
   await writeFile(path.join(OUT, "addresses.json"), JSON.stringify(addresses));
