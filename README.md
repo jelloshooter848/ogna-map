@@ -1,10 +1,13 @@
 # OGNA Neighborhood Map
 
-**Open the map: https://oldtowngilroy.org/**
+- **Public site: https://oldtowngilroy.org/** ("Which neighborhood am I in?", in English and Spanish)
+- **Organizer map: https://oldtowngilroy.org/organize/**
 
 Where things stand, decisions made so far, and the public-site plan: [`docs/SESSION_HANDOFF.md`](docs/SESSION_HANDOFF.md).
 
-An organizing map for the **Oldtown Gilroy Neighborhood Alliance**: the Oldtown district, the small
+This repo holds two front ends that share the same data. The **public site** (`index.html`, `site/`) is read-only
+and shows no demographic or per-lot numbers; see [Public site](#public-site). The **organizer map**
+(`organize/`) is described below: an organizing map for the **Oldtown Gilroy Neighborhood Alliance**: the Oldtown district, the small
 neighborhood associations inside it (which may overlap), and who lives on each lot. The map is built from
 [densitymap](https://github.com/jelloshooter848/densitymap), but works with lots and census blocks instead
 of census tracts. Background on OGNA is in [`docs/OGNA_CONTEXT.md`](docs/OGNA_CONTEXT.md).
@@ -32,17 +35,17 @@ of census tracts. Background on OGNA is in [`docs/OGNA_CONTEXT.md`](docs/OGNA_CO
 
 ## Running it
 
-The live site is **https://oldtowngilroy.org/**, served by GitHub Pages from this branch; every push updates it. Your neighborhood edits and any imported tax roll stay in your browser, not on the site.
+The live site is **https://oldtowngilroy.org/** (public) and **/organize/** (organizer map), served by GitHub Pages from this branch; every push updates it. Your neighborhood edits and any imported tax roll stay in your browser, not on the site.
 
 To run it locally instead: it's a static site with no build step, but browsers block `fetch()` from `file://`, so serve the folder:
 
 ```
 python3 -m http.server 8000      # or: npm run serve
-# open http://localhost:8000/
+# open http://localhost:8000/organize/ (organizer) or http://localhost:8000/ (public site)
 ```
 
 To try it before the real data exists, run `node scripts/make_fixture.mjs` and open
-`http://localhost:8000/?data=test/fixture/`. That loads a synthetic street grid with about 6,000 lots.
+`http://localhost:8000/organize/?data=test/fixture/`. That loads a synthetic street grid with about 6,000 lots.
 
 Libraries (Leaflet 1.9.4, Turf 7.4, html2canvas 1.4.1) load from pinned CDN URLs. `window.app` exposes the
 state and stats modules for debugging.
@@ -57,6 +60,10 @@ state and stats modules for debugging.
 | `data/sources/build_report.json` | What each build stage did, sanity checks (Gilroy population from blocks vs. 59,520), and the parcel layer's field inventory and land-use codes | same |
 | `data/sources/boundary_streets.geojson` | OpenStreetMap geometry of the district's boundary streets, for drawing the district | same |
 | `data/regions/oldtown.json` | The shipped region set: the district, seeded from a rough polygon along Hwy 101, Miller Ave / Princevalle St, Leavesley Rd / Welburn Ave and 10th St | hand-edited |
+| `data/regions/public.json` | What the public site shows: the organizer map's **Export public** file, committed | organizers (see *Public site*) |
+| `data/public/regions.geojson` | District, neighborhood and "no group yet" shapes for the public site. Names, colors and meeting times only: no lot lists, no numbers | `scripts/build_public.mjs` |
+| `data/public/addresses.json` | House numbers by street with a point inside each lot, for the address search | same |
+| `data/public/osm.json` | Parks, schools, library, community centers and transit stops from OpenStreetMap | same |
 
 **Building the data.** The **Build data** GitHub Action (`.github/workflows/build-data.yml`) runs
 `scripts/build_gilroy.mjs` on a GitHub runner. It starts on any push that changes the script,
@@ -80,6 +87,43 @@ pin a specific layer or field names, set `parcels.arcgis_layers` / `parcels.fiel
   improvements − exemptions) × `EST_TAX_RATE` (1.18%, a typical Gilroy tax-rate-area rate). That leaves out
   special assessments and direct charges. Per-resident and per-square-foot tax figures use only the lots
   that have tax data.
+
+## Public site
+
+`index.html` plus `site/`: mobile first, English and Spanish, read-only. It loads only the small files in
+`data/public/` and `content/`, never `parcels.json`, and shows nothing demographic or per lot.
+
+- **Which neighborhood am I in?** Type an address (matched offline against `data/public/addresses.json`),
+  use your location (needs HTTPS), or tap the map. The answer is the neighborhood(s), "in Oldtown, no group
+  yet" with a *Start a group* button, or "outside Oldtown".
+- **Neighborhood pages** at `?n=<slug>` (e.g. `?n=church-street`): description, photo, meeting time, *Join*
+  button, events, nearby City projects, "Report an issue to the City", council-district links, Print and Share.
+- **Links:** City services, OurGilroy's dashboards ("Gilroy by the numbers"), elections, Shop Downtown Gilroy.
+- `?lang=es` or `?lang=en` switches language; the choice is remembered.
+
+### Publishing neighborhoods
+
+1. In the organizer map (`/organize/`), **Edit → Export public**. This file leaves out coordinators and contacts.
+2. On GitHub, open the `data/regions` folder on branch `claude/ogna-density-map-fp8a4s`, choose **Add file →
+   Upload files**, and upload the export **renamed to `public.json`** (replace the existing file). Commit.
+3. The **Build public data** Action (`.github/workflows/build-public.yml`) runs by itself, turns the lots into
+   shapes, and commits `data/public/`. The site shows the change a minute or two later.
+
+The Action also runs weekly to refresh OpenStreetMap places, and after every *Build data* run.
+
+### Public site content (`content/`)
+
+Until the Google Sheet exists (see the hand-off), content is edited in these files, in the same columns the
+Sheet will have. Only rows with `"approved": true` are shown (resources don't need it). A blank `_es` field falls back
+to English, flagged "Translation needed".
+
+| File | Rows look like |
+|---|---|
+| `site.json` | `start_group_link`, `starter_kit_link`, `suggest_link` (form links; blank hides the button) |
+| `neighborhoods.json` | `{ "map_id": 2, "name": "Church Street", "description_en": "…", "description_es": "…", "meets_en": "First Tuesday, 7 pm", "meets_es": "Primer martes, 7 pm", "join_link": "https://forms.gle/…", "photo": "https://…", "approved": true }`. `map_id` is the neighborhood's id in the organizer map. |
+| `events.json` | `{ "date": "2026-10-10", "time": "10:00", "title_en": "…", "title_es": "…", "address": "…", "lat": 37.006, "lng": -121.57, "neighborhood": "church-street", "link": "https://…", "approved": true }`. Past events hide themselves. |
+| `places.json` | `{ "name": "…", "category": "shop", "description_en": "…", "description_es": "…", "lat": 37.006, "lng": -121.57, "website": "https://…", "approved": true }` |
+| `resources.json` | `{ "category": "city" \| "elections" \| "numbers" \| "projects" \| "community", "title_en": "…", "title_es": "…", "note_en": "…", "note_es": "…", "link": "https://…", "neighborhood": "church-street" }`. `neighborhood` is optional (blank means sitewide). |
 
 ## Privacy
 
@@ -127,15 +171,26 @@ Until then those rows show "—".
 ## Tests
 
 ```
-npm test                                           # model: allocation, overlaps, undo, round trip, tax import
-node scripts/make_fixture.mjs && node test/browser.mjs   # end to end in headless Chromium
+npm test                                           # model: allocation, overlaps, undo, round trip, tax import, public build and search
+node scripts/make_fixture.mjs && node test/browser.mjs   # organizer map end to end in headless Chromium
+node scripts/make_fixture.mjs && node scripts/build_public.mjs --data test/fixture/ --no-osm && node test/public_browser.mjs
+                                                         # public site end to end at phone size
 node test/real_smoke.mjs                                 # loads the real data/, prints district totals
 ```
 
 ## Layout
 
 ```
-index.html        shell markup
+index.html        public site
+site/
+  app.js          public pages: search, neighborhood pages, lists
+  map.js          public map
+  address.js      address normalization and search (no DOM; also used by the build)
+  content.js      content rules: approved rows, Spanish fallback, upcoming events (no DOM)
+  i18n.js         English and Spanish interface text
+  site.css
+content/          public-site text and links (see Public site content)
+organize/index.html  organizer map markup
 css/app.css
 js/
   config.js       URLs, palette, tax rate, land-use rules and unit weights
@@ -143,6 +198,7 @@ js/
   state.js        district + neighborhoods (many-to-many membership), undo/redo (no DOM)
   stats.js        stats for any set of lots, union totals, coverage, city benchmark (no DOM)
   render.js       Leaflet map, shading, region shapes and labels, modes
+  geo.js          point-in-polygon (no DOM; shared)
   lasso.js        polygon area selection
   ui.js           side panel
   editor.js       edit actions, toolbar, tax-roll import wiring
@@ -152,6 +208,7 @@ js/
   main.js         bootstrap
 scripts/
   build_gilroy.mjs  data build (run by the GitHub Action)
+  build_public.mjs  public-site data: shapes, address index, OpenStreetMap places
   sources.json      build settings: boxes, boundary streets, parcel layer discovery
   make_fixture.mjs  synthetic test data
 docs/             OGNA background, Public Records Act request draft
@@ -163,9 +220,10 @@ docs/             OGNA background, Public Records Act request draft
   `js/transit.js` and `scripts/build_transit.mjs` can be ported).
 - ACS block-group layers: income, rent burden, language, vehicle access.
 - Traffic collision points (TIMS/SWITRS).
-- A public-facing version with amenities, stores, events and neighborhood boundaries.
+- Public site: the Google Sheet content pipeline, a council-district layer, the City calendar feed, a Mills
+  Act walking tour.
 
 ## Attribution
 
-Basemap © OpenStreetMap contributors. Census geometry and counts: U.S. Census Bureau (public domain).
+Basemap and public-site places © OpenStreetMap contributors (ODbL). Census geometry and counts: U.S. Census Bureau (public domain).
 Parcels: County of Santa Clara.

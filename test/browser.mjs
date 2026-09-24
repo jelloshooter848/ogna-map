@@ -45,7 +45,7 @@ const shot = (n) => page.screenshot({ path: path.join(SHOTS, `${n}.png`) });
 const ev = (fn, arg) => page.evaluate(fn, arg);
 
 try {
-  await page.goto(`${base}?data=test/fixture/`);
+  await page.goto(`${base}organize/?data=test/fixture/`);
   await page.waitForFunction(() => /Ready/.test(document.getElementById("status").textContent), null, { timeout: 30000 });
   const lotCount = await ev(() => window.app.lots.size);
   assert.equal(lotCount, 6264);

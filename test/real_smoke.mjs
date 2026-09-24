@@ -23,7 +23,7 @@ await page.route(/unpkg\.com|cdn\.jsdelivr\.net/, async (route) => { const f = O
 await page.route(/tile\.openstreetmap/, (r) => r.abort());
 await mkdir(SHOTS, { recursive: true });
 const t0 = Date.now();
-await page.goto(`http://127.0.0.1:${server.address().port}/`);
+await page.goto(`http://127.0.0.1:${server.address().port}/organize/`);
 await page.waitForFunction(() => /Ready|Could not/.test(document.getElementById("status").textContent), null, { timeout: 60000 });
 console.log("load ms", Date.now() - t0, "|", await page.locator("#status").textContent());
 console.log(JSON.stringify(await page.evaluate(() => {

@@ -1,7 +1,8 @@
 # OGNA map: session hand-off
 
 A condensed record of the first working session (22–24 September 2026), where the organizer map was designed and
-built and the public site was planned, and of the second (24 September 2026), which reviewed ourgilroy.com (§7). **Decisions marked ✅ are the organizer's (the user's).** Don't re-plan
+built and the public site was planned, and of the second (24 September 2026), which reviewed ourgilroy.com (§7)
+and built the public site's first version (§5a). **Decisions marked ✅ are the organizer's (the user's).** Don't re-plan
 them; build on them. Background on OGNA itself is in [`OGNA_CONTEXT.md`](OGNA_CONTEXT.md).
 
 ---
@@ -23,7 +24,8 @@ them; build on them. Background on OGNA itself is in [`OGNA_CONTEXT.md`](OGNA_CO
 
 ## 2. The organizer map (built and live)
 
-Live at **https://oldtowngilroy.org/** (currently the organizer map sits at the root).
+Live at **https://oldtowngilroy.org/organize/** (moved from the root on 24 September 2026; browser saves carry over,
+since they are stored per domain).
 
 - **Model:** lots (parcels) are the unit. 2020 census block counts (people, homes, households, renters, adults)
   are spread over each block's residential lots by housing units. That's an estimate, and groups of lots are more
@@ -118,6 +120,36 @@ Live at **https://oldtowngilroy.org/** (currently the organizer map sits at the 
   - a blank Spanish cell falls back to English and is flagged "translation needed".
 - ✅ The user bought **oldtowngilroy.org** (see §4).
 
+## 5a. Public site: what is built (v1, 24 September 2026)
+
+- ✅ **Swapped straight away**, with no preview stage: the public site is at the root, the organizer map at
+  `/organize/`. The public footer links "For organizers" to `/organize/`.
+- **Files:** `index.html` + `site/` (app, map, address search, content rules, EN/ES text); `content/*.json`;
+  `scripts/build_public.mjs` → `data/public/` (`regions.geojson`, `addresses.json`, `osm.json`); the *Build public
+  data* Action (`.github/workflows/build-public.yml`) runs on changes to `data/regions/**`, weekly (OSM) and on
+  demand. *Build data* also runs it, because a workflow's own commits don't start other workflows.
+- **The public site doesn't load `parcels.json` (10 MB) or `units.js`/`stats.js`.** It shows no numbers, so
+  the build turns the lots into shapes and an address index instead. It shares `js/config.js`, the new
+  DOM-free `js/geo.js` (point in polygon) and the data build with the organizer map.
+- **Publishing neighborhoods:** Export public → upload as `data/regions/public.json` on GitHub → the Action
+  builds shapes (lots merged, street gaps closed, no APNs or private fields). Steps are in the README. Until
+  then it shows the district only, with all of it marked "no group yet".
+- **Address search** is offline: parcel addresses in the parcel box (about 9,500), matched after
+  normalizing (Street→ST, Avenue→AV, Sixth→6TH, units and ZIP dropped). A number not on file uses the nearest
+  one on that street, and a wrong suffix still matches (Monterey Rd / St). Anything outside the parcel box is
+  "not found"; tapping the map still works there.
+- **Content:** ✅ no Google Sheet yet, so v1 reads `content/*.json` in the Sheet's columns (README, "Public site
+  content"). `site.json` holds the start-a-group, starter-kit and suggestion form links; **they are blank, so those
+  buttons are hidden** until the user supplies them. `resources.json` is seeded with the City tools, voter links,
+  OurGilroy dashboards, Shop Downtown Gilroy, and eleven Oldtown capital projects (OurGilroy links).
+- **Council district:** no district layer yet, so neighborhood pages show the voter and district-lookup links
+  (§7 decision) without naming the district.
+- **Spanish** interface text (`site/i18n.js`) is a first draft awaiting the volunteer's review.
+- **Next steps, in order:** (1) the user fills in the form links and ticks Enforce HTTPS; (2) the Google Sheet
+  → hourly Action pipeline (Census geocoder, writing `content/*.json`; the rules in `site/content.js` are
+  already shared); (3) the council-district layer; (4) the City calendar feed; (5) static per-neighborhood
+  pages for link previews; (6) the Mills Act walking tour and an OGNA positions page.
+
 ## 6. City of Gilroy website and services
 
 ✅ Principle: **link to and reuse the City's existing tools; don't rebuild them.**
@@ -165,7 +197,9 @@ Live at **https://oldtowngilroy.org/** (currently the organizer map sits at the 
 
 - The district's **west edge**: Miller Ave draws a tail to the southwest; the user may prefer Princevalle for the
   southern stretch. ✅ The user will adjust it in the app after launch.
-- Serve the organizer map at `oldtowngilroy.org/organize/` or only elsewhere?
+- ✅ The organizer map is at `oldtowngilroy.org/organize/`.
+- **Enforce HTTPS** (§4) is still needed: "Use my location" on the public site only works over HTTPS.
+- Form links for "Start a group", the starter kit and suggestions (`content/site.json`).
 - "Oldtown" or "Old Town"; a logo.
 - A Spanish-speaking volunteer to review translations.
 - Will OGNA ever endorse candidates or measures, or only take policy positions? Linking OurGilroy's election
@@ -181,7 +215,9 @@ Live at **https://oldtowngilroy.org/** (currently the organizer map sits at the 
 - The repo is public: **never commit** tax or assessor files, owner names, or coordinator contacts.
 - Tests:
   - `npm test` (model);
-  - `node scripts/make_fixture.mjs && node test/browser.mjs` (end to end on synthetic data);
+  - `node scripts/make_fixture.mjs && node test/browser.mjs` (organizer map, end to end on synthetic data);
+  - `node scripts/build_public.mjs --data test/fixture/ --no-osm && node test/public_browser.mjs` (public site at
+    phone size; also checks that no demographic or per-lot words appear);
   - `node test/real_smoke.mjs` (real data).
   CDNs and map tiles are blocked in cloud sessions, so the browser tests serve the libraries from
   `node_modules` and use Chromium at `/opt/pw-browsers`.

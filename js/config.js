@@ -6,13 +6,16 @@ export const FORMAT_VERSION = "6.0";          // region-set file format written 
 export const STORAGE_KEY = "ogna_map_region_set_v6";
 export const METRIC_STORAGE_KEY = "ogna_map_metric";
 
-// Data files live under data/ by default; ?data=test/fixture/ points the app at another folder.
+// Data files live under data/ by default; ?data=test/fixture/ points the app at another folder. Paths are
+// resolved from the repository root (this file's parent folder), so any page can load them.
 const params = new URLSearchParams(globalThis.location?.search || "");
-export const DATA_BASE = (params.get("data") || "data/").replace(/\/?$/, "/");
+export const ROOT_URL = new URL("../", import.meta.url).href;
+export const DATA_OVERRIDE = params.get("data") ? params.get("data").replace(/\/?$/, "/") : "";
+export const DATA_BASE = new URL(DATA_OVERRIDE || "data/", ROOT_URL).href;
 export const PARCELS_URL = DATA_BASE + "parcels.json";
 export const BLOCKS_URL = DATA_BASE + "blocks.json";
 export const CITY_URL = DATA_BASE + "city_limits.json";
-export const DEFAULT_REGION_SET_URL = "data/regions/oldtown.json";
+export const DEFAULT_REGION_SET_URL = new URL("data/regions/oldtown.json", ROOT_URL).href;
 
 export const TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 export const TILE_ATTRIBUTION = "&copy; OpenStreetMap contributors";

@@ -1,0 +1,194 @@
+[
+ {
+  "category": "city",
+  "title_en": "Report an issue to the City (GilroyConnect)",
+  "title_es": "Reportar un problema a la Ciudad (GilroyConnect)",
+  "link": "https://seeclickfix.com/gilroy",
+  "note_en": "Potholes, graffiti, streetlights, parks, code problems.",
+  "note_es": "Baches, grafiti, alumbrado, parques, infracciones."
+ },
+ {
+  "category": "city",
+  "title_en": "Classes and programs (Parks & Recreation)",
+  "title_es": "Clases y programas (Parques y Recreación)",
+  "link": "https://secure.rec1.com/CA/gilroy-ca/catalog"
+ },
+ {
+  "category": "city",
+  "title_en": "Reserve a park or picnic area",
+  "title_es": "Reservar un parque o área de picnic",
+  "link": "https://www.cityofgilroy.org/recreation"
+ },
+ {
+  "category": "city",
+  "title_en": "City calendar",
+  "title_es": "Calendario de la Ciudad",
+  "link": "https://www.cityofgilroy.org/Calendar.aspx"
+ },
+ {
+  "category": "city",
+  "title_en": "City Council agendas and video",
+  "title_es": "Agendas y videos del Concejo Municipal",
+  "link": "https://gilroyca.portal.civicclerk.com/"
+ },
+ {
+  "category": "elections",
+  "title_en": "Find your City Council district (City map)",
+  "title_es": "Encuentre su distrito del Concejo (mapa de la Ciudad)",
+  "link": "https://experience.arcgis.com/experience/f9345053b06745fea301ee6f3a8995d8"
+ },
+ {
+  "category": "elections",
+  "title_en": "District-based elections (City of Gilroy)",
+  "title_es": "Elecciones por distrito (Ciudad de Gilroy)",
+  "link": "https://www.cityofgilroy.org/1069/District-Based-Elections"
+ },
+ {
+  "category": "elections",
+  "title_en": "Voter information (Santa Clara County)",
+  "title_es": "Información para votantes (Condado de Santa Clara)",
+  "link": "https://vote.santaclaracounty.gov/city-gilroy"
+ },
+ {
+  "category": "elections",
+  "title_en": "Register to vote",
+  "title_es": "Registrarse para votar",
+  "link": "https://registertovote.ca.gov"
+ },
+ {
+  "category": "elections",
+  "title_en": "Candidates and districts (OurGilroy)",
+  "title_es": "Candidatos y distritos (OurGilroy)",
+  "link": "https://ourgilroy.com/elections.php"
+ },
+ {
+  "category": "numbers",
+  "title_en": "City Council activity",
+  "title_es": "Actividad del Concejo Municipal",
+  "link": "https://ourgilroy.com/council.php",
+  "note_en": "Meetings, votes, and a map of agenda items.",
+  "note_es": "Reuniones, votaciones y un mapa de los temas de la agenda."
+ },
+ {
+  "category": "numbers",
+  "title_en": "Development activity",
+  "title_es": "Proyectos de desarrollo",
+  "link": "https://ourgilroy.com/development.php",
+  "note_en": "Every development project and where it stands.",
+  "note_es": "Cada proyecto de desarrollo y su estado."
+ },
+ {
+  "category": "numbers",
+  "title_en": "Capital projects",
+  "title_es": "Obras públicas",
+  "link": "https://ourgilroy.com/capital.php",
+  "note_en": "What the City is building and what it costs.",
+  "note_es": "Lo que construye la Ciudad y cuánto cuesta."
+ },
+ {
+  "category": "numbers",
+  "title_en": "City service requests",
+  "title_es": "Solicitudes de servicio",
+  "link": "https://ourgilroy.com/scf.php",
+  "note_en": "GilroyConnect reports and how fast they're resolved.",
+  "note_es": "Reportes de GilroyConnect y qué tan rápido se resuelven."
+ },
+ {
+  "category": "numbers",
+  "title_en": "Crime dashboard",
+  "title_es": "Panel de delitos",
+  "link": "https://ourgilroy.com/crime.php",
+  "note_en": "Police arrests from public records.",
+  "note_es": "Arrestos de la policía según registros públicos."
+ },
+ {
+  "category": "numbers",
+  "title_en": "Fire and EMS incidents",
+  "title_es": "Incidentes de bomberos y emergencias",
+  "link": "https://ourgilroy.com/fire.php",
+  "note_en": "Fire Department calls from PulsePoint.",
+  "note_es": "Llamadas al Departamento de Bomberos, vía PulsePoint."
+ },
+ {
+  "category": "numbers",
+  "title_en": "Elections",
+  "title_es": "Elecciones",
+  "link": "https://ourgilroy.com/elections.php",
+  "note_en": "Districts, candidates and ballot measures.",
+  "note_es": "Distritos, candidatos y medidas electorales."
+ },
+ {
+  "category": "community",
+  "title_en": "Shop Downtown Gilroy",
+  "title_es": "Compre en el centro de Gilroy",
+  "link": "https://shopdowntowngilroy.com/shop.html",
+  "note_en": "Directory of downtown shops.",
+  "note_es": "Directorio de tiendas del centro."
+ },
+ {
+  "category": "projects",
+  "title_en": "Civic Center Master Plan",
+  "title_es": "Plan maestro del Centro Cívico",
+  "link": "https://ourgilroy.com/capital_project.php?id=121"
+ },
+ {
+  "category": "projects",
+  "title_en": "Gilroy Library renovation",
+  "title_es": "Renovación de la Biblioteca de Gilroy",
+  "link": "https://ourgilroy.com/capital_project.php?id=122"
+ },
+ {
+  "category": "projects",
+  "title_en": "Monterey St / I.O.O.F. Ave traffic signal",
+  "title_es": "Semáforo en Monterey St / I.O.O.F. Ave",
+  "link": "https://ourgilroy.com/capital_project.php?id=16"
+ },
+ {
+  "category": "projects",
+  "title_en": "Gilroy Center for the Arts heating and cooling",
+  "title_es": "Calefacción y aire del Centro de las Artes",
+  "link": "https://ourgilroy.com/capital_project.php?id=49"
+ },
+ {
+  "category": "projects",
+  "title_en": "Church St water line, Welburn to First",
+  "title_es": "Tubería de agua en Church St, de Welburn a First",
+  "link": "https://ourgilroy.com/capital_project.php?id=34"
+ },
+ {
+  "category": "projects",
+  "title_en": "Monterey and Eighth water line",
+  "title_es": "Tubería de agua en Monterey y Eighth",
+  "link": "https://ourgilroy.com/capital_project.php?id=37"
+ },
+ {
+  "category": "projects",
+  "title_en": "Forest and Eighth water line",
+  "title_es": "Tubería de agua en Forest y Eighth",
+  "link": "https://ourgilroy.com/capital_project.php?id=35"
+ },
+ {
+  "category": "projects",
+  "title_en": "Martin and Railroad water line",
+  "title_es": "Tubería de agua en Martin y Railroad",
+  "link": "https://ourgilroy.com/capital_project.php?id=56"
+ },
+ {
+  "category": "projects",
+  "title_en": "Carmel–Dowdy alley sewer, Sixth to Seventh",
+  "title_es": "Alcantarillado del callejón Carmel–Dowdy, de Sixth a Seventh",
+  "link": "https://ourgilroy.com/capital_project.php?id=26"
+ },
+ {
+  "category": "projects",
+  "title_en": "Seventh St sewer",
+  "title_es": "Alcantarillado de Seventh St",
+  "link": "https://ourgilroy.com/capital_project.php?id=30"
+ },
+ {
+  "category": "projects",
+  "title_en": "Old Gilroy St sewer, Chestnut to Forest",
+  "title_es": "Alcantarillado de Old Gilroy St, de Chestnut a Forest",
+  "link": "https://ourgilroy.com/capital_project.php?id=29"
+ }
+]

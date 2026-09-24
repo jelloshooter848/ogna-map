@@ -1,21 +1,14 @@
 // Polygon selection: click to add corners, double-click (or click the first corner) to finish, Esc to
 // cancel. Resolves with the lots whose center falls inside, or null when cancelled.
 import { map, lotCenter, lotLayers } from "./render.js";
+import { insidePolygon } from "./geo.js";
+
+export { insidePolygon };
 
 let active = null;
 
 export function isSelecting() { return Boolean(active); }
 export function cancelSelection() { active?.finish(null); }
-
-/** Ray-casting point-in-polygon on [lat, lng] pairs. */
-export function insidePolygon([y, x], ring) {
-  let inside = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const [yi, xi] = ring[i], [yj, xj] = ring[j];
-    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
-  }
-  return inside;
-}
 
 export function selectArea() {
   cancelSelection();

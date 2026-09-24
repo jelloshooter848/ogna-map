@@ -1,0 +1,52 @@
+# Builds the public site's small data files (neighborhood shapes, address index, OpenStreetMap places) from the
+# committed "Export public" file (data/regions/public.json) and the parcel layer, and commits them back.
+name: Build public data
+
+on:
+  push:
+    paths:
+      - data/regions/**
+      - scripts/build_public.mjs
+      - site/address.js
+      - js/geo.js
+      - .github/workflows/build-public.yml
+  schedule:
+    - cron: "17 9 * * 1"   # Mondays: refresh parks, schools and transit from OpenStreetMap
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-public-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build public data
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: node scripts/build_public.mjs
+      - name: Commit public data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/public/
+          if git diff --cached --quiet; then echo "no public data changes"; exit 0; fi
+          git commit -m "Build public site data (run ${{ github.run_number }})"
+          for i in 1 2 3; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            sleep 5
+          done
+          exit 1

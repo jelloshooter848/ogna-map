@@ -1,5 +1,5 @@
 // Bootstrap: load lots, blocks, city limits and the region set; wire the UI; restore browser saves.
-import { APP_VERSION, DEFAULT_REGION_SET_URL, PARCELS_URL, BLOCKS_URL, CITY_URL, DATA_BASE } from "./config.js";
+import { APP_VERSION, DEFAULT_REGION_SET_URL, PARCELS_URL, BLOCKS_URL, CITY_URL, DATA_OVERRIDE } from "./config.js";
 import { state, applyRegionSet, toRegionSet, regionIds, region } from "./state.js";
 import { loadData, lots, setTaxRoll } from "./units.js";
 import { map, addBaseLayers, rebuildRegionGeometry, fitRegions, resetView, lotCenter, lotLayers } from "./render.js";
@@ -71,7 +71,7 @@ async function boot() {
     updateHistoryButtons();
     updateMetricLegend();
     resetView();
-    setStatus(`Ready · ${n.lots.toLocaleString()} lots · ${n.blocks.toLocaleString()} census blocks${DATA_BASE !== "data/" ? ` · <b>data from ${DATA_BASE}</b>` : ""}.${restored} ${workingCopyStatus()}`);
+    setStatus(`Ready · ${n.lots.toLocaleString()} lots · ${n.blocks.toLocaleString()} census blocks${DATA_OVERRIDE ? ` · <b>data from ${DATA_OVERRIDE}</b>` : ""}.${restored} ${workingCopyStatus()}`);
   } catch (err) {
     console.error(err);
     if (err.status === 404 && (err.url === PARCELS_URL || err.url === BLOCKS_URL)) {
