@@ -152,7 +152,7 @@ scripts/
   build_gilroy.mjs  data build (run by the GitHub Action)
   sources.json      build settings: boxes, boundary streets, parcel layer discovery
   make_fixture.mjs  synthetic test data
-docs/             OGNA background, Public Records Act request draft
+docs/             OGNA background, public-site plan, Public Records Act request draft
 ```
 
 ## Later
@@ -161,7 +161,7 @@ docs/             OGNA background, Public Records Act request draft
   `js/transit.js` and `scripts/build_transit.mjs` can be ported).
 - ACS block-group layers: income, rent burden, language, vehicle access.
 - Traffic collision points (TIMS/SWITRS).
-- A public-facing version with amenities, stores, events and neighborhood boundaries.
+- A public-facing site at oldtowngilroy.org: see [`docs/PUBLIC_SITE_PLAN.md`](docs/PUBLIC_SITE_PLAN.md).
 
 ## Attribution
 
