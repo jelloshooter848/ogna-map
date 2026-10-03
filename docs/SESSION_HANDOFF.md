@@ -21,6 +21,10 @@ them; build on them. Background on OGNA itself is in [`OGNA_CONTEXT.md`](OGNA_CO
   free bulk file. Bulk options: buy the Assessor's secured roll file, or file a California Public Records Act
   request with the Tax Collector (draft in [`pra_request.md`](pra_request.md)). ✅ The map estimates tax from
   assessed values until a real roll is imported.
+- ✅ **Getting the real tax roll:** a Public Records Act request, sent by the organizer as an individual, for all
+  of Gilroy, with the Oldtown parcel list ([`oldtown_apns.csv`](oldtown_apns.csv), 3,161 APNs) attached as a
+  fallback. The request, sending steps, follow-up template and import steps are in [`pra_request.md`](pra_request.md).
+  Status: prepared 2026-10-03; record the date it is sent and the County's replies here.
 
 ## 2. The organizer map (built and live)
 

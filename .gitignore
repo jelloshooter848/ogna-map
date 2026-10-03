@@ -9,3 +9,5 @@ private/
 .DS_Store
 test/fixture/
 test/screenshots/
+# Public parcel list attached to the records request (no tax data).
+!docs/oldtown_apns.csv
